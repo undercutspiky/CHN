@@ -112,13 +112,13 @@ with graph.as_default():
     net = tflearn.batch_normalization(net)
     net = relu(net)
     tc_multiplier = tf.placeholder(tf.float32)
-    net = tf.reduce_mean(net, [1, 2]) + tc_multiplier * tf.reduce_mean(transform_sum)
+    net = tf.reduce_mean(net, [1, 2])
     net = tflearn.fully_connected(net, 10, activation='linear', weights_init=tflearn.initializations.xavier(),
                                   bias_init='uniform', regularizer='L2', weight_decay=0.0002)
 
     # Calculate loss
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(net, y)
-    loss = tf.reduce_mean(cross_entropy)
+    loss = tf.reduce_mean(cross_entropy) + tc_multiplier * tf.reduce_mean(transform_sum)
 
     # Find all the correctly classified examples
     correct_ = tf.equal(tf.argmax(y, 1), tf.argmax(net, 1))
