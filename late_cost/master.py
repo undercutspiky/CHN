@@ -78,27 +78,36 @@ with graph.as_default():
 
     net, stage1 = conv_highway(net, 16, 16 * width, 1, 3, width > 1)
     transform_sum += tf.reduce_sum(stage1, axis=[1])
+    s_temp = [stage1]
 
     for ii in xrange(3):
         net, t_s = conv_highway(net, 16 * width, 16 * width, 1, 3)
-        stage1 = tf.stack([stage1, t_s], 1)
+        s_temp.append(t_s)
         transform_sum += tf.reduce_sum(t_s, axis=[1])
+
+    stage1 = tf.stack(s_temp, 1)
 
     net, stage2 = conv_highway(net, 16 * width, 32 * width, 2, 3)
     transform_sum += tf.reduce_sum(stage2, axis=[1])
+    s_temp = [stage2]
 
     for ii in xrange(3):
         net, t_s = conv_highway(net, 32 * width, 32 * width, 1, 3)
-        stage2 = tf.stack([stage2, t_s], 1)
+        s_temp.append(t_s)
         transform_sum += tf.reduce_sum(t_s, axis=[1])
+
+    stage2 = tf.stack(s_temp, 1)
 
     net, stage3 = conv_highway(net, 32 * width, 64 * width, 2, 3)
     transform_sum += tf.reduce_sum(stage3, axis=[1])
+    s_temp = [stage3]
 
     for ii in xrange(3):
         net, t_s = conv_highway(net, 64 * width, 64 * width, 1, 3)
-        stage3 = tf.stack([stage3, t_s], 1)
+        s_temp.append(t_s)
         transform_sum += tf.reduce_sum(t_s, axis=[1])
+
+    stage3 = tf.stack(s_temp, 1)
 
     net = tflearn.batch_normalization(net)
     net = relu(net)
