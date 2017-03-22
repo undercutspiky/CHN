@@ -139,7 +139,7 @@ with graph.as_default():
 train_x = []
 train_y = []
 for i in xrange(1, 6):
-    dict_ = unpickle('../CIFAR-10/data_batch_' + str(i))
+    dict_ = unpickle('../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
         train_y = dict_['labels']
@@ -148,7 +148,7 @@ for i in xrange(1, 6):
         train_y.extend(dict_['labels'])
 
 train_y = np.array(train_y)
-dict_ = unpickle('../CIFAR-10/test_batch')
+dict_ = unpickle('../data/CIFAR-10/test_batch')
 valid_x = np.array(dict_['data'])/255.0
 valid_y = np.eye(10)[dict_['labels']]
 train_y = np.eye(10)[train_y]
