@@ -51,8 +51,8 @@ def conv_highway(x, fan_in, fan_out, stride, filter_size, not_pool=False):
             x_new = tf.pad(x, [[0, 0], [0, 0], [0, 0], [(fan_out - fan_in) // 2, (fan_out - fan_in) // 2]])
 
         res += C * x_new
-        return res, tf.reduce_sum(T, axis=[1,2,3])
-    return (res + (C * x)), tf.reduce_sum(T, axis=[1,2,3])
+        return res, tf.reduce_sum(T, axis=[1, 2])
+    return (res + (C * x)), tf.reduce_sum(T, axis=[1, 2])
 
 batch_size = 128
 width = int(sys.argv[1])
@@ -76,30 +76,34 @@ with graph.as_default():
     net = tflearn.conv_2d(net, 16, 3, 1, 'same', 'linear', weights_init=tflearn.initializations.xavier(),
                           bias_init='uniform', regularizer='L2', weight_decay=0.0002)
 
-    net, t_s = conv_highway(net, 16, 16 * width, 1, 3, width > 1)
-    transform_sum += t_s
+    net, stage1 = conv_highway(net, 16, 16 * width, 1, 3, width > 1)
+    transform_sum += tf.reduce_sum(stage1, axis=[1])
 
     for ii in xrange(3):
         net, t_s = conv_highway(net, 16 * width, 16 * width, 1, 3)
-        transform_sum += t_s
+        stage1 = tf.stack([stage1, t_s], 1)
+        transform_sum += tf.reduce_sum(t_s, axis=[1])
 
-    net, t_s = conv_highway(net, 16 * width, 32 * width, 2, 3)
-    transform_sum += t_s
+    net, stage2 = conv_highway(net, 16 * width, 32 * width, 2, 3)
+    transform_sum += tf.reduce_sum(stage2, axis=[1])
 
     for ii in xrange(3):
         net, t_s = conv_highway(net, 32 * width, 32 * width, 1, 3)
-        transform_sum += t_s
+        stage2 = tf.stack([stage2, t_s], 1)
+        transform_sum += tf.reduce_sum(t_s, axis=[1])
 
-    net, t_s = conv_highway(net, 32 * width, 64 * width, 2, 3)
-    transform_sum += t_s
+    net, stage3 = conv_highway(net, 32 * width, 64 * width, 2, 3)
+    transform_sum += tf.reduce_sum(stage3, axis=[1])
 
     for ii in xrange(3):
         net, t_s = conv_highway(net, 64 * width, 64 * width, 1, 3)
-        transform_sum += t_s
+        stage3 = tf.stack([stage3, t_s], 1)
+        transform_sum += tf.reduce_sum(t_s, axis=[1])
 
     net = tflearn.batch_normalization(net)
     net = relu(net)
-    net = tf.reduce_mean(net, [1, 2]) + 0.000003*tf.reduce_sum(transform_sum)
+    tc_multiplier = tf.placeholder(tf.float32)
+    net = tf.reduce_mean(net, [1, 2]) + tc_multiplier * tf.reduce_mean(transform_sum)
     net = tflearn.fully_connected(net, 10, activation='linear', weights_init=tflearn.initializations.xavier(),
                                   bias_init='uniform', regularizer='L2', weight_decay=0.0002)
 
@@ -126,7 +130,7 @@ with graph.as_default():
 train_x = []
 train_y = []
 for i in xrange(1, 6):
-    dict_ = unpickle('../../../cifar-10/cifar-10-batches-py/data_batch_' + str(i))
+    dict_ = unpickle('../CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
         train_y = dict_['labels']
@@ -135,7 +139,7 @@ for i in xrange(1, 6):
         train_y.extend(dict_['labels'])
 
 train_y = np.array(train_y)
-dict_ = unpickle('../../../cifar-10/cifar-10-batches-py/test_batch')
+dict_ = unpickle('../CIFAR-10/test_batch')
 valid_x = np.array(dict_['data'])/255.0
 valid_y = np.eye(10)[dict_['labels']]
 train_y = np.eye(10)[train_y]
@@ -146,12 +150,14 @@ train_x = np.reshape(train_x, [-1, 32, 32, 3])
 valid_x = np.dstack((valid_x[:, :1024], valid_x[:, 1024:2048], valid_x[:, 2048:]))
 valid_x = np.reshape(valid_x, [-1, 32, 32, 3])
 
-epochs = 150  # 10 * int(round(40000/batch_size)+1)
+epochs = 100  # 10 * int(round(40000/batch_size)+1)
 losses = []
-transforms = []
+transforms_stage_1 = []; transforms_stage_2 = []; transforms_stage_3 = []
+test_transforms_stage_1 = []; test_transforms_stage_2 = []; test_transforms_stage_3 = []
+test_accuracies = []
 learn_rate = 0.1
 with tf.Session(graph=graph) as session:
-    #tf.initialize_all_variables().run()
+
     session.run(init_op)
     saver = tf.train.Saver()
     save_path = saver.save(session,'./initial-model')
@@ -163,11 +169,25 @@ with tf.Session(graph=graph) as session:
     i = 1
     cursor = 0
 
+    print "CHECKING IF GETTING TRANSFORMATIONS WORK FOR 10K EXAMPLES"
+    for iii in xrange(100):
+        batch_xs = train_x[iii * 100: (iii + 1) * 100]
+        batch_ys = train_y[iii * 100: (iii + 1) * 100]
+        feed_dict = {x: batch_xs, y: batch_ys}
+        st1, st2, st3 = session.run([stage1, stage2, stage3], feed_dict=feed_dict)
+
+        transforms_stage_1.extend(st1); transforms_stage_2.extend(st2); transforms_stage_3.extend(st3);
+    print len(transforms_stage_1), len(transforms_stage_2), len(transforms_stage_3)
+    transforms_stage_1 = []; transforms_stage_2 = []; transforms_stage_3 = []
+
     while i <= epochs:
 
         batch_xs = random_train_x[cursor: min((cursor + batch_size), len(train_x))]
         batch_ys = random_train_y[cursor: min((cursor + batch_size), len(train_x))]
-        feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate}
+        if i < 21:
+            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.0}
+        else:
+            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.0005}
 
         # Train it on the batch
         tflearn.is_training(True, session=session)
@@ -209,6 +229,7 @@ with tf.Session(graph=graph) as session:
                                                        y: valid_y[iii * 100:(iii + 1) * 100]})
                 cor_pred.append(a)
             print "Accuracy = " + str(np.mean(cor_pred))
+            test_accuracies.append(np.mean(cor_pred))
             tflearn.is_training(True, session=session)
             sequence = np.random.choice(len(train_x), size=len(train_x), replace=False)  # The sequence to form batches
             random_train_x = train_x[sequence]
@@ -217,13 +238,28 @@ with tf.Session(graph=graph) as session:
 
     tflearn.is_training(False, session=session)
     save_path = saver.save(session, './final-model')
-    print "GETTING TRANSFORMATIONS FOR ALL EXAMPLES"
+    print "GETTING TRANSFORMATIONS FOR TRAIN SET"
     for iii in xrange(500):
         batch_xs = train_x[iii * 100: (iii + 1) * 100]
         batch_ys = train_y[iii * 100: (iii + 1) * 100]
         feed_dict = {x: batch_xs, y: batch_ys}
-        cr = session.run([transform_sum], feed_dict=feed_dict)
+        st1, st2, st3 = session.run([stage1, stage2, stage3], feed_dict=feed_dict)
 
-        transforms.extend(cr[0])
-    np.save('transforms', transforms)
+        transforms_stage_1.extend(st1); transforms_stage_2.extend(st2); transforms_stage_3.extend(st3);
+
+    print "GETTING TRANSFORMATIONS FOR TEST SET"
+    for iii in xrange(100):
+        batch_xs = valid_x[iii * 100: (iii + 1) * 100]
+        batch_ys = valid_y[iii * 100: (iii + 1) * 100]
+        feed_dict = {x: batch_xs, y: batch_ys}
+        st1, st2, st3 = session.run([stage1, stage2, stage3], feed_dict=feed_dict)
+
+        test_transforms_stage_1.extend(st1); test_transforms_stage_2.extend(st2); test_transforms_stage_3.extend(st3);
+    np.save('transforms_stage_1', transforms_stage_1)
+    np.save('transforms_stage_2', transforms_stage_2)
+    np.save('transforms_stage_3', transforms_stage_3)
+    np.save('test_transforms_stage_1', test_transforms_stage_1)
+    np.save('test_transforms_stage_2', test_transforms_stage_2)
+    np.save('test_transforms_stage_3', test_transforms_stage_3)
     np.save('losses', losses)
+    np.save('test_accuracies', test_accuracies)
