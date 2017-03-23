@@ -61,6 +61,8 @@ graph = tf.Graph()
 with graph.as_default():
     x = tf.placeholder(tf.float32, [None, 32, 32, 3])
     y = tf.placeholder(tf.float32, [None, 10])
+    tc_multiplier = tf.placeholder(tf.float32)
+
     transform_sum = tf.Variable(0.0)
 
     img_prep = tflearn.ImagePreprocessing()
@@ -111,7 +113,6 @@ with graph.as_default():
 
     net = tflearn.batch_normalization(net)
     net = relu(net)
-    tc_multiplier = tf.placeholder(tf.float32)
     net = tf.reduce_mean(net, [1, 2])
     net = tflearn.fully_connected(net, 10, activation='linear', weights_init=tflearn.initializations.xavier(),
                                   bias_init='uniform', regularizer='L2', weight_decay=0.0002)
@@ -177,17 +178,6 @@ with tf.Session(graph=graph) as session:
 
     i = 1
     cursor = 0
-
-    print "CHECKING IF GETTING TRANSFORMATIONS WORK FOR 10K EXAMPLES"
-    for iii in xrange(100):
-        batch_xs = train_x[iii * 100: (iii + 1) * 100]
-        batch_ys = train_y[iii * 100: (iii + 1) * 100]
-        feed_dict = {x: batch_xs, y: batch_ys}
-        st1, st2, st3 = session.run([stage1, stage2, stage3], feed_dict=feed_dict)
-
-        transforms_stage_1.extend(st1); transforms_stage_2.extend(st2); transforms_stage_3.extend(st3);
-    print len(transforms_stage_1), len(transforms_stage_2), len(transforms_stage_3)
-    transforms_stage_1 = []; transforms_stage_2 = []; transforms_stage_3 = []
 
     while i <= epochs:
 
