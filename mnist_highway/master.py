@@ -66,7 +66,7 @@ with graph.as_default():
     init_op = tf.global_variables_initializer()
 
 # Load MNIST data
-f = gzip.open('mnist.pkl.gz', 'rb')
+f = gzip.open('../data/MNIST/mnist.pkl.gz', 'rb')
 train_set, valid_set, test_set = cPickle.load(f)
 f.close()
 del test_set
