@@ -36,7 +36,9 @@ with graph.as_default():
     y = tf.placeholder(tf.float32, [None, 10])
     tc_multiplier = tf.placeholder(tf.float32)
 
-    net, t1 = full_highway(x, 500)
+    net = tflearn.fully_connected(x, 100, activation='linear', weights_init=tflearn.initializations.xavier(),
+                                  bias_init='uniform', regularizer='L2', weight_decay=0.0001)
+    net, t1 = full_highway(net, 300)
     net, t2 = full_highway(net, 300)
     net, t3 = full_highway(net, 300)
 
