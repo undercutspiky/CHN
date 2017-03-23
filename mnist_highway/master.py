@@ -75,7 +75,7 @@ valid_x, valid_y = valid_set
 train_y = np.eye(10)[train_y]
 valid_y = np.eye(10)[valid_y]
 
-epochs = 100
+epochs = 50
 
 losses = []
 transforms_layer_1 = []; transforms_layer_2 = []; transforms_layer_3 = []
@@ -95,26 +95,14 @@ with tf.Session(graph=graph) as session:
     i = 1
     cursor = 0
 
-    print "GETTING TRANSFORMATIONS FOR TEST SET TO CHECK SHAPES"
-    for iii in xrange(100):
-        batch_xs = valid_x[iii * 100: (iii + 1) * 100]
-        batch_ys = valid_y[iii * 100: (iii + 1) * 100]
-        feed_dict = {x: batch_xs, y: batch_ys}
-        st1, st2, st3 = session.run([t1, t2, t3], feed_dict=feed_dict)
-
-        valid_transforms_layer_1.extend(st1); valid_transforms_layer_2.extend(st2); valid_transforms_layer_3.extend(st3)
-    print len(valid_transforms_layer_1), len(valid_transforms_layer_2), len(valid_transforms_layer_3)
-    print valid_transforms_layer_1[0].shape, valid_transforms_layer_2[0].shape, valid_transforms_layer_3[0].shape
-    valid_transforms_layer_1 = []; valid_transforms_layer_2 = []; valid_transforms_layer_3 = []
-
     while i <= epochs:
 
         batch_xs = random_train_x[cursor: min((cursor + batch_size), len(train_x))]
         batch_ys = random_train_y[cursor: min((cursor + batch_size), len(train_x))]
-        if i < 21:
+        if i < 11:
             feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.0}
         else:
-            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.05}
+            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.005}
 
         # Train it on the batch
         tflearn.is_training(True, session=session)
