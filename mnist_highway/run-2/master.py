@@ -102,7 +102,7 @@ with tf.Session(graph=graph) as session:
         if i < 11:
             feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.0}
         else:
-            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.003}
+            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.005}
 
         # Train it on the batch
         tflearn.is_training(True, session=session)
