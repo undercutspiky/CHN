@@ -86,7 +86,7 @@ with tf.Session(graph=graph) as session:
 
     session.run(init_op)
     saver = tf.train.Saver()
-    save_path = saver.save(session,'./initial-model')
+    save_path = saver.save(session, './initial-model')
 
     sequence = np.random.choice(len(train_x), size=len(train_x), replace=False)  # The sequence to form batches
     random_train_x = train_x[sequence]
@@ -152,7 +152,6 @@ with tf.Session(graph=graph) as session:
             i += 1
 
     tflearn.is_training(False, session=session)
-    save_path = saver.save(session, './final-model')
     print "GETTING TRANSFORMATIONS FOR TRAIN SET"
     for iii in xrange(500):
         batch_xs = train_x[iii * 100: (iii + 1) * 100]
