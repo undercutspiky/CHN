@@ -160,7 +160,7 @@ train_x = np.reshape(train_x, [-1, 32, 32, 3])
 valid_x = np.dstack((valid_x[:, :1024], valid_x[:, 1024:2048], valid_x[:, 2048:]))
 valid_x = np.reshape(valid_x, [-1, 32, 32, 3])
 
-epochs = 70  # 10 * int(round(40000/batch_size)+1)
+epochs = 100  # 10 * int(round(40000/batch_size)+1)
 losses = []
 transforms_stage_1 = []; transforms_stage_2 = []; transforms_stage_3 = []
 test_transforms_stage_1 = []; test_transforms_stage_2 = []; test_transforms_stage_3 = []
@@ -188,7 +188,7 @@ with tf.Session(graph=graph) as session:
         elif i < 55:
             feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 0.07}
         else:
-            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 100.1}
+            feed_dict = {x: batch_xs, y: batch_ys, lr: learn_rate, tc_multiplier: 10.1}
         # Train it on the batch
         tflearn.is_training(True, session=session)
         _, train_step = session.run([optimizer, global_step], feed_dict=feed_dict)
