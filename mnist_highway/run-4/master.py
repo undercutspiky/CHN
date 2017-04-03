@@ -47,13 +47,15 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
+        self.batchnorm_layers = []
         for i in xrange(10):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
+            self.batchnorm_layers.append(nn.BatchNorm1d(fan_out))
 
     def forward(self, x):
         net = F.leaky_relu(self.linear(x))
         for layer in self.highway_layers:
-            net = layer(net)
+            net = F.leaky_relu(layer(net))
         return net
 
 network = Net()
