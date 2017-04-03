@@ -30,16 +30,18 @@ class Highway(nn.Module):
         # Affine transformation layer and transform gates
         self.linear = nn.Linear(fan_in, fan_out)
         self.transform = nn.Linear(fan_in, fan_out)
+        self.batch_norm = nn.BatchNorm1d(fan_out)
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
         w_initialization(self.linear.weight)
         w_initialization(self.transform.weight)
         nn.init.constant(self.transform.bias, b_init)
 
-    def forward(self, x):
+    def forward(self, x, train_mode=True):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
-        return h * t + (1 - t) * x
+        self.batch_norm.training = train_mode
+        return self.batch_norm(h * t + (1 - t) * x)
 
 
 class Net(nn.Module):
@@ -47,15 +49,13 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
-        self.batchnorm_layers = []
         for i in xrange(10):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
-            self.batchnorm_layers.append(nn.BatchNorm1d(fan_out))
 
-    def forward(self, x):
+    def forward(self, x, train_mode=True):
         net = F.leaky_relu(self.linear(x))
         for layer in self.highway_layers:
-            net = F.leaky_relu(layer(net))
+            net = layer(net, train_mode)
         return net
 
 network = Net()
@@ -84,7 +84,7 @@ for epoch in xrange(1, epochs+1):
     correct = 0
     total = 0
     while cursor < len(valid_x):
-        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]))
+        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]), False)
         labels = valid_y[cursor:min(cursor+batch_size, len(valid_x))]
         _, predicted = torch.max(outputs.data, 1)
         total += len(labels)
