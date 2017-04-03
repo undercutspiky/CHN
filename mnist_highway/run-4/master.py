@@ -13,6 +13,9 @@ train_set, valid_set, test_set = cPickle.load(f)
 f.close()
 del test_set
 train_x, train_y = train_set
+sequence = np.random.choice(len(train_x), size=len(train_x), replace=False)
+train_x = train_x[sequence]
+train_y = train_y[sequence]
 valid_x, valid_y = valid_set
 train_x = torch.from_numpy(train_x).cuda()
 valid_x = torch.from_numpy(valid_x).cuda()
@@ -21,7 +24,7 @@ valid_y = torch.from_numpy(valid_y).cuda()
 
 
 class Highway(nn.Module):
-    def __init__(self, fan_in, fan_out, w_init='xavier_uniform', b_init=-2.0):
+    def __init__(self, fan_in, fan_out, w_init='xavier_normal', b_init=-2.0):
         """
         In the constructor we instantiate two nn.Linear modules and assign them as
         member variables.
@@ -30,39 +33,40 @@ class Highway(nn.Module):
         # Affine transformation layer and transform gates
         self.linear = nn.Linear(fan_in, fan_out)
         self.transform = nn.Linear(fan_in, fan_out)
-        self.batch_norm = nn.BatchNorm1d(fan_out)
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
         w_initialization(self.linear.weight)
         w_initialization(self.transform.weight)
-        nn.init.constant(self.transform.bias, b_init)
+        nn.init.uniform(self.transform.bias)
+        nn.init.uniform(self.linear.bias)
 
-    def forward(self, x, train_mode=True):
+    def forward(self, x):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
-        self.batch_norm.training = train_mode
-        return self.batch_norm(h * t + (1 - t) * x)
+        return h * t + (1 - t) * x
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=100):
+    def __init__(self, fan_in=784, fan_out=300):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
-        for i in xrange(10):
+        self.final = nn.Linear(fan_out, 10)
+        for i in xrange(3):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
-    def forward(self, x, train_mode=True):
+    def forward(self, x):
         net = F.leaky_relu(self.linear(x))
         for layer in self.highway_layers:
-            net = layer(net, train_mode)
+            net = layer(net)
+        net = self.final(net)
         return net
 
 network = Net()
 network = network.cuda()
 print network
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.7, weight_decay=0.0001)
+optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0.0001)
 
 epochs = 100
 batch_size = 128
@@ -70,7 +74,7 @@ batch_size = 128
 for epoch in xrange(1, epochs+1):
 
     if epoch > 30:
-        optimizer = optim.SGD(network.parameters(), lr=0.001, momentum=0.6, weight_decay=0.0001)
+        optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
     cursor = 0
     while cursor < len(train_x):
         optimizer.zero_grad()
@@ -84,7 +88,7 @@ for epoch in xrange(1, epochs+1):
     correct = 0
     total = 0
     while cursor < len(valid_x):
-        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]), False)
+        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]))
         labels = valid_y[cursor:min(cursor+batch_size, len(valid_x))]
         _, predicted = torch.max(outputs.data, 1)
         total += len(labels)
