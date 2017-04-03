@@ -25,10 +25,6 @@ valid_y = torch.from_numpy(valid_y).cuda()
 
 class Highway(nn.Module):
     def __init__(self, fan_in, fan_out, w_init='xavier_normal', b_init=-2.0):
-        """
-        In the constructor we instantiate two nn.Linear modules and assign them as
-        member variables.
-        """
         super(Highway, self).__init__()
         # Affine transformation layer and transform gates
         self.linear = nn.Linear(fan_in, fan_out)
