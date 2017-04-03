@@ -14,6 +14,10 @@ f.close()
 del test_set
 train_x, train_y = train_set
 valid_x, valid_y = valid_set
+train_x = torch.from_numpy(train_x).cuda()
+valid_x = torch.from_numpy(valid_x).cuda()
+train_y = torch.from_numpy(train_y).cuda()
+valid_y = torch.from_numpy(valid_y).cuda()
 
 
 class Highway(nn.Module):
@@ -33,7 +37,7 @@ class Highway(nn.Module):
         nn.init.constant(self.transform.bias, b_init)
 
     def forward(self, x):
-        h = F.leaky_relu(self.linear1(x))
+        h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
         return h * t + (1 - t) * x
 
@@ -44,7 +48,7 @@ class Net(nn.Module):
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
         for i in xrange(10):
-            self.highway_layers.append(Highway(fan_out, fan_out))
+            self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x):
         net = F.leaky_relu(self.linear(x))
@@ -53,6 +57,8 @@ class Net(nn.Module):
         return net
 
 network = Net()
+network = network.cuda()
+print network
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
 
@@ -65,10 +71,12 @@ for epoch in xrange(1, epochs+1):
     while cursor < len(train_x):
         optimizer.zero_grad()
         outputs = network(Variable(train_x[cursor:min(cursor+batch_size, len(train_x))]))
-        loss = criterion(outputs, train_y[cursor:min(cursor+batch_size, len(train_x))])
+        loss = criterion(outputs, Variable(train_y[cursor:min(cursor+batch_size, len(train_x))]))
         loss.backward()
         optimizer.step()
-
+        cursor += batch_size
+    
+    cursor = 0
     correct = 0
     total = 0
     while cursor < len(valid_x):
@@ -77,5 +85,6 @@ for epoch in xrange(1, epochs+1):
         _, predicted = torch.max(outputs.data, 1)
         total += len(labels)
         correct += (predicted == labels).sum()
+        cursor += batch_size
 
-    print('Accuracy of the network on the 10000 test images: %d %%' % (100 * correct / total))
+    print('For epoch %d - Accuracy of the network on the 10000 test images: %f %%' % (epoch, 100.0 * correct / total))
