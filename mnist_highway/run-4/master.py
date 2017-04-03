@@ -33,32 +33,34 @@ class Highway(nn.Module):
         # Affine transformation layer and transform gates
         self.linear = nn.Linear(fan_in, fan_out)
         self.transform = nn.Linear(fan_in, fan_out)
+        self.batch_norm = nn.BatchNorm1d(fan_out)
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
         w_initialization(self.linear.weight)
         w_initialization(self.transform.weight)
-        nn.init.uniform(self.transform.bias)
+        nn.init.constant(self.transform.bias, b_init)
         nn.init.uniform(self.linear.bias)
 
-    def forward(self, x):
+    def forward(self, x, train_mode=True):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
-        return h * t + (1 - t) * x
+        self.batch_norm.training = train_mode
+        return self.batch_norm(h * t + (1 - t) * x)
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=300):
+    def __init__(self, fan_in=784, fan_out=100):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(3):
+        for i in xrange(15):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
-    def forward(self, x):
+    def forward(self, x, train_mode=True):
         net = F.leaky_relu(self.linear(x))
         for layer in self.highway_layers:
-            net = layer(net)
+            net = layer(net, train_mode)
         net = self.final(net)
         return net
 
@@ -88,11 +90,11 @@ for epoch in xrange(1, epochs+1):
     correct = 0
     total = 0
     while cursor < len(valid_x):
-        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]))
+        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]), False)
         labels = valid_y[cursor:min(cursor+batch_size, len(valid_x))]
         _, predicted = torch.max(outputs.data, 1)
         total += len(labels)
         correct += (predicted == labels).sum()
         cursor += batch_size
 
-    print('For epoch %d \t - Accuracy on valid set: %f %%' % (epoch, 100.0 * correct / total))
+    print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, 100.0 * correct / total))
