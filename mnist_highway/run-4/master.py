@@ -43,7 +43,7 @@ class Highway(nn.Module):
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=50):
+    def __init__(self, fan_in=784, fan_out=100):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
@@ -60,13 +60,15 @@ network = Net()
 network = network.cuda()
 print network
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
+optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.7, weight_decay=0.0001)
 
-epochs = 50
+epochs = 100
 batch_size = 128
 
 for epoch in xrange(1, epochs+1):
 
+    if epoch > 30:
+        optimizer = optim.SGD(network.parameters(), lr=0.001, momentum=0.6, weight_decay=0.0001)
     cursor = 0
     while cursor < len(train_x):
         optimizer.zero_grad()
@@ -87,4 +89,4 @@ for epoch in xrange(1, epochs+1):
         correct += (predicted == labels).sum()
         cursor += batch_size
 
-    print('For epoch %d - Accuracy of the network on the 10000 test images: %f %%' % (epoch, 100.0 * correct / total))
+    print('For epoch %d \t - Accuracy on valid set: %f %%' % (epoch, 100.0 * correct / total))
