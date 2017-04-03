@@ -1,0 +1,81 @@
+import cPickle, gzip
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.autograd import Variable
+
+
+# Load MNIST data
+f = gzip.open('../../data/MNIST/mnist.pkl.gz', 'rb')
+train_set, valid_set, test_set = cPickle.load(f)
+f.close()
+del test_set
+train_x, train_y = train_set
+valid_x, valid_y = valid_set
+
+
+class Highway(nn.Module):
+    def __init__(self, fan_in, fan_out, w_init='xavier_uniform', b_init=-2.0):
+        """
+        In the constructor we instantiate two nn.Linear modules and assign them as
+        member variables.
+        """
+        super(Highway, self).__init__()
+        # Affine transformation layer and transform gates
+        self.linear = nn.Linear(fan_in, fan_out)
+        self.transform = nn.Linear(fan_in, fan_out)
+        # Get weight initialization function
+        w_initialization = getattr(nn.init, w_init)
+        w_initialization(self.linear.weight)
+        w_initialization(self.transform.weight)
+        nn.init.constant(self.transform.bias, b_init)
+
+    def forward(self, x):
+        h = F.leaky_relu(self.linear1(x))
+        t = F.sigmoid(self.transform(x))
+        return h * t + (1 - t) * x
+
+
+class Net(nn.Module):
+    def __init__(self, fan_in=784, fan_out=50):
+        super(Net, self).__init__()
+        self.linear = nn.Linear(fan_in, fan_out)
+        self.highway_layers = []
+        for i in xrange(10):
+            self.highway_layers.append(Highway(fan_out, fan_out))
+
+    def forward(self, x):
+        net = F.leaky_relu(self.linear(x))
+        for layer in self.highway_layers:
+            net = layer(net)
+        return net
+
+network = Net()
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
+
+epochs = 50
+batch_size = 128
+
+for epoch in xrange(1, epochs+1):
+
+    cursor = 0
+    while cursor < len(train_x):
+        optimizer.zero_grad()
+        outputs = network(Variable(train_x[cursor:min(cursor+batch_size, len(train_x))]))
+        loss = criterion(outputs, train_y[cursor:min(cursor+batch_size, len(train_x))])
+        loss.backward()
+        optimizer.step()
+
+    correct = 0
+    total = 0
+    while cursor < len(valid_x):
+        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]))
+        labels = valid_y[cursor:min(cursor+batch_size, len(valid_x))]
+        _, predicted = torch.max(outputs.data, 1)
+        total += len(labels)
+        correct += (predicted == labels).sum()
+
+    print('Accuracy of the network on the 10000 test images: %d %%' % (100 * correct / total))
