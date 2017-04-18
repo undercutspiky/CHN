@@ -24,7 +24,7 @@ valid_y = torch.from_numpy(valid_y).cuda()
 
 
 class Highway(nn.Module):
-    def __init__(self, fan_in, fan_out, w_init='xavier_normal', b_init=-2.0):
+    def __init__(self, fan_in, fan_out, w_init='kaiming_normal', b_init=-2.0):
         super(Highway, self).__init__()
         # Affine transformation layer and transform gates
         self.linear = nn.Linear(fan_in, fan_out)
@@ -45,12 +45,12 @@ class Highway(nn.Module):
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=100):
+    def __init__(self, fan_in=784, fan_out=150):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(15):
+        for i in xrange(10):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True):
