@@ -41,7 +41,7 @@ class Highway(nn.Module):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
         self.batch_norm.training = train_mode
-        return self.batch_norm(h * t + (1 - t) * x)
+        return self.batch_norm(h * t + (1 - t) * x), t
 
 
 class Net(nn.Module):
@@ -53,11 +53,23 @@ class Net(nn.Module):
         for i in xrange(10):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
-    def forward(self, x, train_mode=True):
+    def forward(self, x, train_mode=True, get_t=False):
         net = F.leaky_relu(self.linear(x))
+        temp = None
+        t_cost = 0
         for layer in self.highway_layers:
-            net = layer(net, train_mode)
+            net,t = layer(net, train_mode)
+            t_cost = torch.sum(torch.max(t, dim=0)[0])
+            if get_t:
+                if temp is None:
+                    temp = np.expand_dims(t.numpy(), axis=1)
+                else:
+                    temp = np.append(temp, np.expand_dims(t.numpy(), axis=1), axis=1)
         net = self.final(net)
+        if get_t:
+            return net, temp.numpy()
+        if train_mode:
+            return net, t_cost
         return net
 
 network = Net()
@@ -76,8 +88,11 @@ for epoch in xrange(1, epochs+1):
     cursor = 0
     while cursor < len(train_x):
         optimizer.zero_grad()
-        outputs = network(Variable(train_x[cursor:min(cursor+batch_size, len(train_x))]))
-        loss = criterion(outputs, Variable(train_y[cursor:min(cursor+batch_size, len(train_x))]))
+        outputs, t_cost = network(Variable(train_x[cursor:min(cursor+batch_size, len(train_x))]))
+        if epoch > 20:
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor+batch_size, len(train_x))])) + 0.01*t_cost
+        else:
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor+batch_size, len(train_x))]))
         loss.backward()
         optimizer.step()
         cursor += batch_size
@@ -86,7 +101,7 @@ for epoch in xrange(1, epochs+1):
     correct = 0
     total = 0
     while cursor < len(valid_x):
-        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]), False)
+        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]), train_mode=False)
         labels = valid_y[cursor:min(cursor+batch_size, len(valid_x))]
         _, predicted = torch.max(outputs.data, 1)
         total += len(labels)
