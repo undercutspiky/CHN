@@ -79,9 +79,10 @@ class Highway(nn.Module):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
         self.batch_norm.training = train_mode
+        out = x.clone()
         for i in xrange(len(self.order)):
-            x[self.order[i]] = (1 - t[i]) * x[self.order[i]] + h[i] * t[i]
-        return self.batch_norm(x), t
+            out[:,self.order[i]] = (1 - t[:,i]) * x[:,self.order[i]] + h[:,i] * t[:,i]
+        return self.batch_norm(out), t
 
 
 class Net(nn.Module):
@@ -102,12 +103,12 @@ class Net(nn.Module):
             t_sum = torch.sum(torch.max(t, dim=0)[0])
             if get_t:
                 if temp is None:
-                    temp = np.expand_dims(t.numpy(), axis=1)
+                    temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
                 else:
-                    temp = np.append(temp, np.expand_dims(t.numpy(), axis=1), axis=1)
+                    temp = np.append(temp, np.expand_dims(t.data.cpu().numpy(), axis=1), axis=1)
         net = self.final(net)
         if get_t:
-            return net, temp.numpy()
+            return net, temp
         if train_mode:
             return net, t_sum
         return net
@@ -131,7 +132,7 @@ for epoch in xrange(1, epochs+1):
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
-    if epoch == 50 or epoch == 3:
+    if epoch == 50 or epoch == 1:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
