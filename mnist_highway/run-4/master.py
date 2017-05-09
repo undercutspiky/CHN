@@ -150,6 +150,7 @@ for epoch in xrange(1, epochs + 1):
                 t_values = t_batch
             else:
                 t_values = np.append(t_values, t_batch, axis=0)
+            cursor += batch_size
         print t_values.shape
     cursor = 0
     while cursor < len(train_x):
