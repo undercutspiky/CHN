@@ -45,6 +45,8 @@ class Highway(nn.Module):
         self.reverse_order = [0] * fan_out
         for ii in xrange(fan_out):
             self.reverse_order[self.order[ii]] = ii
+        self.order = torch.cuda.LongTensor(self.order)
+        self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
         w_initialization(self.linear.weight)
