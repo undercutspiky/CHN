@@ -86,9 +86,9 @@ class Highway(nn.Module):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
         self.batch_norm.training = train_mode
-        t = F.pad(Variable(t).unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
-        out = F.pad(Variable(h).unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
-            + Variable(x.t()[self.order].t()) * (1 - t)
+        t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
+        out = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
+            + (x.t()[self.order].t() * (1 - t))
         return self.batch_norm(out), t
 
 
