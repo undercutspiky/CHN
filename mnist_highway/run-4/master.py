@@ -6,7 +6,6 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 
-
 # Load MNIST data
 f = gzip.open('../../data/MNIST/mnist.pkl.gz', 'rb')
 train_set, valid_set, test_set = cPickle.load(f)
@@ -43,6 +42,9 @@ class Highway(nn.Module):
         # The number of the node in the previous layer to which output of each node in this layer is added
         # Look at forward function for more clarity
         self.order = range(fan_out)
+        self.reverse_order = [0] * fan_out
+        for ii in xrange(fan_out):
+            self.reverse_order[self.order[ii]] = ii
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
         w_initialization(self.linear.weight)
@@ -50,38 +52,43 @@ class Highway(nn.Module):
         nn.init.constant(self.transform.bias, b_init)
         nn.init.uniform(self.linear.bias)
 
-    def prune(self, nodes):
+    def prune(self, retain, remove):
         """
         Create new layers and copy the parameters of the selected nodes
-        :param nodes: list of nodes to retain
-        :type nodes: python List
+        :param retain: list of nodes to retain
+        :type retain: python List
+        :param remove: list of nodes to remove (helps in setting self.order)
+        :type remove: python List
         """
-        self.order = nodes
         # New linear layer
-        linear = nn.Linear(self.fan_in, len(nodes))
-        linear.weight = torch.nn.Parameter(self.linear.weight[torch.LongTensor(nodes)].data)
-        linear.bias = torch.nn.Parameter(self.linear.bias[torch.LongTensor(nodes)].data)
+        linear = nn.Linear(self.fan_in, len(retain))
+        linear.weight = torch.nn.Parameter(self.linear.weight[torch.LongTensor(retain)].data)
+        linear.bias = torch.nn.Parameter(self.linear.bias[torch.LongTensor(retain)].data)
         self.linear = linear
         # New transform layer
-        linear = nn.Linear(self.fan_in, len(nodes))
-        linear.weight = torch.nn.Parameter(self.transform.weight[torch.LongTensor(nodes)].data)
-        linear.bias = torch.nn.Parameter(self.transform.bias[torch.LongTensor(nodes)].data)
+        linear = nn.Linear(self.fan_in, len(retain))
+        linear.weight = torch.nn.Parameter(self.transform.weight[torch.LongTensor(retain)].data)
+        linear.bias = torch.nn.Parameter(self.transform.bias[torch.LongTensor(retain)].data)
         self.transform = linear
         # New batch normalization layer
-        bn = nn.BatchNorm1d(len(nodes))
-        bn.weight = torch.nn.Parameter(self.batch_norm.weight[torch.LongTensor(nodes)].data)
-        bn.bias = torch.nn.Parameter(self.batch_norm.bias[torch.LongTensor(nodes)].data)
+        bn = nn.BatchNorm1d(len(retain))
+        bn.weight = torch.nn.Parameter(self.batch_norm.weight[torch.LongTensor(retain)].data)
+        bn.bias = torch.nn.Parameter(self.batch_norm.bias[torch.LongTensor(retain)].data)
         bn.running_mean = self.batch_norm.running_weight
         bn.running_var = self.batch_norm.running_var
         self.batch_norm = bn
+        # Set self.order and reverse order
+        self.order = retain + remove
+        for ii in xrange(len(self.order)):
+            self.reverse_order[self.order[ii]] = ii
 
     def forward(self, x, train_mode=True):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
         self.batch_norm.training = train_mode
-        out = x.clone()
-        for i in xrange(len(self.order)):
-            out[:,self.order[i]] = (1 - t[:,i]) * x[:,self.order[i]] + h[:,i] * t[:,i]
+        t = F.pad(Variable(t).unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
+        out = F.pad(Variable(h).unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
+            + Variable(x.t()[self.order].t()) * (1 - t)
         return self.batch_norm(out), t
 
 
@@ -119,6 +126,7 @@ def loss(y, targets):
     l = [-torch.log(temp[i][targets[i].data[0]]) for i in range(y.size(0))]
     return F.cross_entropy(y, targets), l
 
+
 network = Net()
 network = network.cuda()
 print network
@@ -128,7 +136,7 @@ optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0
 epochs = 100
 batch_size = 128
 
-for epoch in xrange(1, epochs+1):
+for epoch in xrange(1, epochs + 1):
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
@@ -144,21 +152,21 @@ for epoch in xrange(1, epochs+1):
     cursor = 0
     while cursor < len(train_x):
         optimizer.zero_grad()
-        outputs, t_cost = network(Variable(train_x[cursor:min(cursor+batch_size, len(train_x))]))
+        outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         if epoch > 20:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor+batch_size, len(train_x))])) + 0.01*t_cost
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.01 * t_cost
         else:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor+batch_size, len(train_x))]))
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
         optimizer.step()
         cursor += batch_size
-    
+
     cursor = 0
     correct = 0
     total = 0
     while cursor < len(valid_x):
-        outputs = network(Variable(valid_x[cursor:min(cursor+batch_size, len(valid_x))]), train_mode=False)
-        labels = valid_y[cursor:min(cursor+batch_size, len(valid_x))]
+        outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+        labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
         _, predicted = torch.max(outputs.data, 1)
         total += len(labels)
         correct += (predicted == labels).sum()
