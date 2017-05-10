@@ -80,9 +80,10 @@ class Highway(nn.Module):
         bn.running_var = self.batch_norm.running_var
         self.batch_norm = bn
         # Set self.order and reverse order
-        self.order = retain + remove
+        self.order = torch.cuda.LongTensor(retain + remove)
         for ii in xrange(len(self.order)):
             self.reverse_order[self.order[ii]] = ii
+        self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
 
     def forward(self, x, train_mode=True):
         h = F.leaky_relu(self.linear(x))
@@ -142,7 +143,7 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
-    if epoch == 1:
+    if epoch == 1 or epoch == 50:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
