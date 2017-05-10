@@ -113,7 +113,7 @@ class Net(nn.Module):
         for layer in self.highway_layers:
             net, t = layer(net, train_mode)
             # Sum of all transform gate for all nodes after taking max value in the batch for each node
-            t_sum += torch.sum(torch.max(t, dim=0)[0])
+            t_sum += torch.sum(t, dim=1)  # torch.sum(torch.max(t, dim=0)[0])
             if get_t:
                 if temp is None:
                     temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
@@ -123,7 +123,7 @@ class Net(nn.Module):
         if get_t:
             return net, temp
         if train_mode:
-            return net, t_sum
+            return net, torch.max(t_sum, dim=0)[0]
         return net
 
 
