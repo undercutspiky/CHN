@@ -142,7 +142,7 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
-    if epoch == 50 or epoch == 1:
+    if epoch == 1:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
@@ -151,7 +151,18 @@ for epoch in xrange(1, epochs + 1):
             else:
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
-        print t_values.shape
+        max_values = np.max(t_values, axis=0)
+        print max_values.shape
+        for i in xrange(len(max_values)):
+            ret, rem = [], []
+            for j in xrange(len(max_values[i])):
+                if max_values[i][j] < 0.02:
+                    rem.append(j)
+                else:
+                    ret.append(j)
+            network.highway_layers[i].prune(ret, rem)
+            print network.highway_layers[i]
+
     cursor = 0
     while cursor < len(train_x):
         optimizer.zero_grad()
