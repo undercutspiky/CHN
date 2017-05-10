@@ -150,7 +150,7 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.001, momentum=0.7, weight_decay=0.0001)
-    if epoch == 20:
+    if epoch == 20 or epoch == 50:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
@@ -165,7 +165,7 @@ for epoch in xrange(1, epochs + 1):
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.2:
+                if max_values[i][j] < 0.5:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -185,7 +185,7 @@ for epoch in xrange(1, epochs + 1):
         loss.backward()
         optimizer.step()
         cursor += batch_size
-    print min([round(iii) for iii in t_cost_arr]), max([round(iii) for iii in t_cost_arr])
+    print round(min(t_cost_arr)), round(max(t_cost_arr))
 
     cursor = 0
     correct = 0
