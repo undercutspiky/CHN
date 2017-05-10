@@ -40,6 +40,7 @@ class Highway(nn.Module):
         # Look at forward function for more clarity
         self.order = range(fan_out)
         self.reverse_order = [0] * fan_out
+        self.pruned = False
         for ii in xrange(fan_out):
             self.reverse_order[self.order[ii]] = ii
         self.order = torch.cuda.LongTensor(self.order)
@@ -51,7 +52,7 @@ class Highway(nn.Module):
         nn.init.constant(self.transform.bias, b_init)
         nn.init.uniform(self.linear.bias)
 
-    def prune(self, retain, remove):
+    def prune(self, retain, remove=[]):
         """
         Create new layers and copy the parameters of the selected nodes
         :param retain: list of nodes to retain
@@ -59,6 +60,8 @@ class Highway(nn.Module):
         :param remove: list of nodes to remove (helps in setting self.order)
         :type remove: python List
         """
+        if len(remove) > 0:
+            self.pruned = True
         # New linear layer
         linear = nn.Linear(self.fan_in, len(retain))
         linear.weight = torch.nn.Parameter(self.linear.weight[torch.cuda.LongTensor(retain)].data)
@@ -86,10 +89,13 @@ class Highway(nn.Module):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
         self.batch_norm.training = train_mode
-        t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
-        out = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
-            + (x.t()[self.order].t() * (1 - t))
-        return self.batch_norm(out.t()[self.reverse_order].t()), t
+        if self.pruned:
+            t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
+            out = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
+                + (x.t()[self.order].t() * (1 - t))
+            return self.batch_norm(out.t()[self.reverse_order].t()), t
+        else:
+            return self.batch_norm(h * t + x * (1 - t)), t
 
 
 class Net(nn.Module):
