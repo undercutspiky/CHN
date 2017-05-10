@@ -185,8 +185,7 @@ for epoch in xrange(1, epochs + 1):
         loss.backward()
         optimizer.step()
         cursor += batch_size
-    if epoch > 10:
-        print sorted(t_cost_arr)
+    print sorted(t_cost_arr)
 
     cursor = 0
     correct = 0
