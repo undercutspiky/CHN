@@ -54,7 +54,8 @@ class Highway(nn.Module):
 
     def prune(self, retain, remove=[]):
         """
-        Create new layers and copy the parameters of the selected nodes
+        Create new layers and copy the parameters of the selected nodes.
+        Current version can't be used to prune twice because it'll mess up self.order
         :param retain: list of nodes to retain
         :type retain: python List
         :param remove: list of nodes to remove (helps in setting self.order)
@@ -137,7 +138,7 @@ network = Net()
 network = network.cuda()
 print network
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0001)
+optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0.0001)
 
 epochs = 100
 batch_size = 128
@@ -149,7 +150,7 @@ for epoch in xrange(1, epochs + 1):
     train_y = train_y[sequence]
 
     if epoch > 30:
-        optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0001)
+        optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
     if epoch == 20 or epoch == 50:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
@@ -179,7 +180,7 @@ for epoch in xrange(1, epochs + 1):
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
         if epoch > 10:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.01 * t_cost
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.005 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
