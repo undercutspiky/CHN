@@ -73,12 +73,12 @@ class Highway(nn.Module):
         linear.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = linear
         # New batch normalization layer
-        bn = nn.BatchNorm1d(len(retain))
-        bn.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain)].data)
-        bn.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain)].data)
-        bn.running_mean = self.batch_norm.running_mean
-        bn.running_var = self.batch_norm.running_var
-        self.batch_norm = bn
+        # bn = nn.BatchNorm1d(len(retain))
+        # bn.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain)].data)
+        # bn.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain)].data)
+        # bn.running_mean = self.batch_norm.running_mean
+        # bn.running_var = self.batch_norm.running_var
+        # self.batch_norm = bn
         # Set self.order and reverse order
         self.order = torch.cuda.LongTensor(retain + remove)
         for ii in xrange(len(self.order)):
