@@ -110,7 +110,7 @@ class Net(nn.Module):
         for layer in self.highway_layers:
             net, t = layer(net, train_mode)
             # Sum of all transform gate for all nodes after taking max value in the batch for each node
-            t_sum = torch.sum(torch.max(t, dim=0)[0])
+            t_sum += torch.sum(torch.max(t, dim=0)[0])
             if get_t:
                 if temp is None:
                     temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
@@ -140,6 +140,10 @@ epochs = 100
 batch_size = 128
 
 for epoch in xrange(1, epochs + 1):
+
+    sequence = torch.randperm(len(train_x)).cuda()
+    train_x = train_x[sequence]
+    train_y = train_y[sequence]
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
