@@ -76,7 +76,7 @@ class Highway(nn.Module):
         bn = nn.BatchNorm1d(len(retain))
         bn.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain)].data)
         bn.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain)].data)
-        bn.running_mean = self.batch_norm.running_weight
+        bn.running_mean = self.batch_norm.running_mean
         bn.running_var = self.batch_norm.running_var
         self.batch_norm = bn
         # Set self.order and reverse order
@@ -152,7 +152,6 @@ for epoch in xrange(1, epochs + 1):
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
-        print max_values.shape
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
