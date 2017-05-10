@@ -173,16 +173,20 @@ for epoch in xrange(1, epochs + 1):
             print network.highway_layers[i]
 
     cursor = 0
+    t_cost_arr = []
     while cursor < len(train_x):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         if epoch > 10:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.01 * t_cost
+            t_cost_arr.append(t_cost)
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
         optimizer.step()
         cursor += batch_size
+    if epoch > 10:
+        print sorted(t_cost_arr)
 
     cursor = 0
     correct = 0
