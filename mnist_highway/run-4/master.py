@@ -165,7 +165,7 @@ for epoch in xrange(1, epochs + 1):
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.05:
+                if max_values[i][j] < 0.2:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -185,7 +185,7 @@ for epoch in xrange(1, epochs + 1):
         loss.backward()
         optimizer.step()
         cursor += batch_size
-    print sorted([round(iii) for iii in t_cost_arr])
+    print min([round(iii) for iii in t_cost_arr]), max([round(iii) for iii in t_cost_arr])
 
     cursor = 0
     correct = 0
