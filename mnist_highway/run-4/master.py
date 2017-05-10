@@ -12,9 +12,6 @@ train_set, valid_set, test_set = cPickle.load(f)
 f.close()
 del test_set
 train_x, train_y = train_set
-sequence = np.random.choice(len(train_x), size=len(train_x), replace=False)
-train_x = train_x[sequence]
-train_y = train_y[sequence]
 valid_x, valid_y = valid_set
 train_x = torch.from_numpy(train_x).cuda()
 valid_x = torch.from_numpy(valid_x).cuda()
