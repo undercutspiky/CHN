@@ -183,6 +183,7 @@ for epoch in xrange(1, epochs + 1):
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
+        nn.utils.clip_grad_norm(network.parameters(), 1.0)
         optimizer.step()
         cursor += batch_size
     print round(min(t_cost_arr)), round(max(t_cost_arr))
