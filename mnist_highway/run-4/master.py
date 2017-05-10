@@ -64,18 +64,18 @@ class Highway(nn.Module):
         """
         # New linear layer
         linear = nn.Linear(self.fan_in, len(retain))
-        linear.weight = torch.nn.Parameter(self.linear.weight[torch.LongTensor(retain)].data)
-        linear.bias = torch.nn.Parameter(self.linear.bias[torch.LongTensor(retain)].data)
+        linear.weight = torch.nn.Parameter(self.linear.weight[torch.cuda.LongTensor(retain)].data)
+        linear.bias = torch.nn.Parameter(self.linear.bias[torch.cuda.LongTensor(retain)].data)
         self.linear = linear
         # New transform layer
         linear = nn.Linear(self.fan_in, len(retain))
-        linear.weight = torch.nn.Parameter(self.transform.weight[torch.LongTensor(retain)].data)
-        linear.bias = torch.nn.Parameter(self.transform.bias[torch.LongTensor(retain)].data)
+        linear.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].data)
+        linear.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = linear
         # New batch normalization layer
         bn = nn.BatchNorm1d(len(retain))
-        bn.weight = torch.nn.Parameter(self.batch_norm.weight[torch.LongTensor(retain)].data)
-        bn.bias = torch.nn.Parameter(self.batch_norm.bias[torch.LongTensor(retain)].data)
+        bn.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain)].data)
+        bn.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain)].data)
         bn.running_mean = self.batch_norm.running_weight
         bn.running_var = self.batch_norm.running_var
         self.batch_norm = bn
