@@ -143,7 +143,7 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
-    if epoch == 1 or epoch == 50:
+    if epoch == 20:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
@@ -153,10 +153,11 @@ for epoch in xrange(1, epochs + 1):
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
+        print max_values
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.02:
+                if max_values[i][j] < 0.05:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -167,8 +168,8 @@ for epoch in xrange(1, epochs + 1):
     while cursor < len(train_x):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
-        if epoch > 20:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.01 * t_cost
+        if epoch > 10:
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.02 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
