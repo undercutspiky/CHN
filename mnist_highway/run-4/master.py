@@ -188,9 +188,7 @@ for epoch in xrange(1, epochs + 1):
         cursor += batch_size
     print round(min(t_cost_arr)), round(max(t_cost_arr))
 
-    cursor = 0
-    correct = 0
-    total = 0
+    cursor, correct, total = 0, 0, 0
     while cursor < len(valid_x):
         outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
         labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
