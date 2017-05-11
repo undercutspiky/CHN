@@ -134,7 +134,9 @@ class Net(nn.Module):
         net = F.avg_pool2d(net, 8, 1)
         net = torch.squeeze(net)
         net = self.final(net)
-        return net, torch.max(t_sum, dim=0)[0]
+        if train_mode:
+            return net, torch.max(t_sum, dim=0)[0]
+        return net
 
 
 network = Net()
