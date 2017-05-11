@@ -113,8 +113,7 @@ class Net(nn.Module):
         temp, t_sum = None, 0
         for layer in self.highway_layers:
             net, t = layer(net, train_mode)
-            # Sum of all transform gate for all nodes after taking max value in the batch for each node
-            t_sum += torch.sum(t, dim=1)  # torch.sum(torch.max(t, dim=0)[0])
+            t_sum += torch.sum(t, dim=1)
             if get_t:
                 if temp is None:
                     temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
@@ -172,8 +171,7 @@ for epoch in xrange(1, epochs + 1):
             network.highway_layers[i].prune(ret, rem)
             print network.highway_layers[i]
 
-    cursor = 0
-    t_cost_arr = []
+    cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
