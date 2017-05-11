@@ -89,7 +89,7 @@ class Highway(nn.Module):
     def forward(self, x, train_mode=True):
         h = F.leaky_relu(self.linear(x))
         t = F.sigmoid(self.transform(x))
-        self.batch_norm.training = train_mode
+        # self.batch_norm.training = train_mode
         if self.pruned:
             t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
             out = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
