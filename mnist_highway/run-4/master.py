@@ -100,12 +100,12 @@ class Highway(nn.Module):
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=250):
+    def __init__(self, fan_in=784, fan_out=300):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(5):
+        for i in xrange(3):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True, get_t=False):
@@ -180,7 +180,7 @@ for epoch in xrange(1, epochs + 1):
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
         if epoch > 10:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.01 * t_cost
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.06 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
