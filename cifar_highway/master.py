@@ -82,7 +82,7 @@ class Residual(nn.Module):
         if self.fan_in != self.fan_out:
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0,(self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2),
                           mode='replicate').squeeze(0)
-        t = self.transform(x_new)
+        t = self.transform(h)
         return h * t + x_new * (1 - t), torch.sum(torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0]), dim=1)
 
 
