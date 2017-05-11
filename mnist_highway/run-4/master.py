@@ -20,7 +20,7 @@ valid_y = torch.from_numpy(valid_y).cuda()
 
 
 class Highway(nn.Module):
-    def __init__(self, fan_in, fan_out, w_init='kaiming_normal', b_init=-2.0):
+    def __init__(self, fan_in, fan_out, w_init='xavier_normal', b_init=-2.0):
         """
         Fully connected Highway Layer
         :param fan_in: Number of nodes in the previous layer
@@ -35,7 +35,7 @@ class Highway(nn.Module):
         # Affine transformation layer and transform gates
         self.linear = nn.Linear(fan_in, fan_out)
         self.transform = nn.Linear(fan_in, fan_out)
-        self.batch_norm = nn.BatchNorm1d(fan_out)
+        # self.batch_norm = nn.BatchNorm1d(fan_out)
         # The number of the node in the previous layer to which output of each node in this layer is added
         # Look at forward function for more clarity
         self.order = range(fan_out)
@@ -94,9 +94,9 @@ class Highway(nn.Module):
             t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
             out = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
                 + (x.t()[self.order].t() * (1 - t))
-            return self.batch_norm(out.t()[self.reverse_order].t()), t
+            return out.t()[self.reverse_order].t(), t
         else:
-            return self.batch_norm(h * t + x * (1 - t)), t
+            return h * t + x * (1 - t), t
 
 
 class Net(nn.Module):
@@ -180,7 +180,7 @@ for epoch in xrange(1, epochs + 1):
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
         if epoch > 10:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.005 * t_cost
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.01 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
