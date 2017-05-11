@@ -82,7 +82,7 @@ class Residual(nn.Module):
         if self.fan_in != self.fan_out:
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0,(self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2),
                           mode='replicate').squeeze(0)
-        t = self.transform(h)
+        t = self.transform(x_new)
         return h * t + x_new * (1 - t), torch.sum(torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0]), dim=1)
 
 
@@ -142,7 +142,7 @@ class Net(nn.Module):
 network = Net()
 network = network.cuda()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4, nesterov=True)
+optimizer = optim.SGD(network.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
 epochs = 250
@@ -155,9 +155,9 @@ for epoch in xrange(1, epochs + 1):
     train_y = train_y[sequence]
 
     if epoch > 150:
-        optimizer = optim.SGD(network.parameters(), lr=0.0001, momentum=0.9, weight_decay=5e-4, nesterov=True)
+        optimizer = optim.SGD(network.parameters(), lr=0.00001, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch > 60:
-        optimizer = optim.SGD(network.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4, nesterov=True)
+        optimizer = optim.SGD(network.parameters(), lr=0.0001, momentum=0.9, weight_decay=5e-4, nesterov=True)
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
         optimizer.zero_grad()
@@ -168,6 +168,7 @@ for epoch in xrange(1, epochs + 1):
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
+        nn.utils.clip_grad_norm(network.parameters(), 1.0)
         optimizer.step()
         cursor += batch_size
     print round(min(t_cost_arr)), round(max(t_cost_arr))
