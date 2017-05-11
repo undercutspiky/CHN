@@ -61,8 +61,8 @@ class Residual(nn.Module):
         nn.init.uniform(self.conv1.bias)
         w_initialization(self.conv2.weight)
         nn.init.uniform(self.conv2.bias)
-        w_initialization(self.expand_x.weight)
-        nn.init.uniform(self.expand_x.bias)
+        # w_initialization(self.expand_x.weight)
+        # nn.init.uniform(self.expand_x.bias)
 
     def forward(self, x, downsample=False, train_mode=True):
         """
