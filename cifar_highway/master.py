@@ -178,7 +178,8 @@ for epoch in xrange(1, epochs + 1):
     while cursor < len(train_x):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
-        t_cost_arr.append(t_cost.data[0][0])
+        if not network.pruned:
+            t_cost_arr.append(t_cost.data[0][0])
         if epoch > 20:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 3e-3 * t_cost
         else:
@@ -187,7 +188,8 @@ for epoch in xrange(1, epochs + 1):
         nn.utils.clip_grad_norm(network.parameters(), 1.0)
         optimizer.step()
         cursor += batch_size
-    print round(min(t_cost_arr)), round(max(t_cost_arr))
+    if not network.pruned:
+        print round(min(t_cost_arr)), round(max(t_cost_arr))
 
     cursor, correct, total = 0, 0, 0
     while cursor < len(valid_x):
