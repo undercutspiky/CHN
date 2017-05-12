@@ -111,11 +111,11 @@ class Net(nn.Module):
         if self.pruned:
             net = F.avg_pool2d(net, 2, 2)
             net = F.pad(net.unsqueeze(0),
-                        (0, 0, 0, 0, (self.fan_out - self.fan_in) // 2, (self.fan_out - self.fan_in) // 2),
+                        (0, 0, 0, 0, (32 - 16) // 2, (32 - 16) // 2),
                         mode='replicate').squeeze(0)
             net = F.avg_pool2d(net, 2, 2)
             net = F.pad(net.unsqueeze(0),
-                        (0, 0, 0, 0, (self.fan_out - self.fan_in) // 2, (self.fan_out - self.fan_in) // 2),
+                        (0, 0, 0, 0, (64 - 32) // 2, (64 - 32) // 2),
                         mode='replicate').squeeze(0)
         else:
             net, t = self.res11(net, train_mode=train_mode)
