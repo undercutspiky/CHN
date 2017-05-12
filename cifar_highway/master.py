@@ -167,7 +167,7 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
-    if epoch == 1:
+    if epoch == 200:
         network.pruned = True
 
     if epoch > 150:
