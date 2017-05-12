@@ -173,7 +173,8 @@ for epoch in xrange(1, epochs + 1):
                 else:
                     ret.append(j)
             network.highway_layers[i].prune(ret, rem)
-            print network.highway_layers[i]
+            if not network.highway_layers[i].completely_pruned:
+                print network.highway_layers[i]
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
