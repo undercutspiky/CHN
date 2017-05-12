@@ -139,8 +139,9 @@ print network
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0.0001)
 
-epochs = 100
+epochs = 150
 batch_size = 128
+prune_at = [20, 50, 70, 90, 110, 130]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -150,7 +151,7 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
-    if epoch == 20 or epoch == 50:
+    if epoch in prune_at:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
