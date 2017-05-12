@@ -164,7 +164,6 @@ for epoch in xrange(1, epochs + 1):
             else:
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
-        np.save('t_values', t_values)
         max_values = np.max(t_values, axis=0)
         for i in xrange(len(max_values)):
             ret, rem = [], []
