@@ -87,6 +87,8 @@ class Residual(nn.Module):
             return
         # New conv layer
         conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
+        print retain
+        print self.conv2.weight[torch.cuda.LongTensor(retain)]
         conv.weight = torch.nn.Parameter(self.conv2.weight[torch.cuda.LongTensor(retain)].data)
         conv.bias = torch.nn.Parameter(self.conv2.bias[torch.cuda.LongTensor(retain)].data)
         self.conv2 = conv
