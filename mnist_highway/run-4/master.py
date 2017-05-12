@@ -88,12 +88,12 @@ class Highway(nn.Module):
 
     def forward(self, x, train_mode=True):
         h = F.leaky_relu(self.linear(x))
+        h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
         # self.batch_norm.training = train_mode
         if self.pruned:
             t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
-            out = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0) * t \
-                + (x.t()[self.order].t() * (1 - t))
+            out = h * t + (x.t()[self.order].t() * (1 - t))
             return out.t()[self.reverse_order].t(), t
         else:
             return h * t + x * (1 - t), t
