@@ -103,39 +103,52 @@ class Net(nn.Module):
         self.res33 = Residual(64*width, 64*width)
         self.res34 = Residual(64*width, 64*width)
         self.final = nn.Linear(64*width, 10)
+        self.pruned = False
 
     def forward(self, x, train_mode=True):
         net = self.conv1(x)
         t_sum = 0
-        net, t = self.res11(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res12(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res13(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res14(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res21(net, train_mode=train_mode, downsample=True)
-        t_sum += t
-        net, t = self.res22(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res23(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res24(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res31(net, train_mode=train_mode, downsample=True)
-        t_sum += t
-        net, t = self.res32(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res33(net, train_mode=train_mode)
-        t_sum += t
-        net, t = self.res34(net, train_mode=train_mode)
-        t_sum += t
+        if self.pruned:
+            net = F.avg_pool2d(net, 2, 2)
+            net = F.pad(net.unsqueeze(0),
+                        (0, 0, 0, 0, (self.fan_out - self.fan_in) // 2, (self.fan_out - self.fan_in) // 2),
+                        mode='replicate').squeeze(0)
+            net = F.avg_pool2d(net, 2, 2)
+            net = F.pad(net.unsqueeze(0),
+                        (0, 0, 0, 0, (self.fan_out - self.fan_in) // 2, (self.fan_out - self.fan_in) // 2),
+                        mode='replicate').squeeze(0)
+        else:
+            net, t = self.res11(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res12(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res13(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res14(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res21(net, train_mode=train_mode, downsample=True)
+            t_sum += t
+            net, t = self.res22(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res23(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res24(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res31(net, train_mode=train_mode, downsample=True)
+            t_sum += t
+            net, t = self.res32(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res33(net, train_mode=train_mode)
+            t_sum += t
+            net, t = self.res34(net, train_mode=train_mode)
+            t_sum += t
         net = F.avg_pool2d(net, 8, 1)
         net = torch.squeeze(net)
         net = self.final(net)
         if train_mode:
-            return net, torch.max(t_sum, dim=0)[0]
+            if not self.pruned:
+                return net, torch.max(t_sum, dim=0)[0]
+            return net, 0
         return net
 
 
@@ -145,7 +158,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
-epochs = 200
+epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 for epoch in xrange(1, epochs + 1):
@@ -153,6 +166,9 @@ for epoch in xrange(1, epochs + 1):
     sequence = torch.randperm(len(train_x)).cuda()
     train_x = train_x[sequence]
     train_y = train_y[sequence]
+
+    if epoch == 1:
+        network.pruned = True
 
     if epoch > 150:
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
