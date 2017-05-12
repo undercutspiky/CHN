@@ -55,7 +55,6 @@ class Highway(nn.Module):
     def prune(self, retain=[], remove=[]):
         """
         Create new layers and copy the parameters of the selected nodes.
-        Current version can't be used to prune twice because it'll mess up self.order
         :param retain: list of nodes to retain
         :type retain: python List
         :param remove: list of nodes to remove (helps in setting self.order)
@@ -92,9 +91,11 @@ class Highway(nn.Module):
         if self.completely_pruned:
             return x, Variable(torch.zeros(x.size()).cuda())
         h = F.leaky_relu(self.linear(x))
+        # Pad with zeros if layer is pruned
         h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
         # self.batch_norm.training = train_mode
+        # Pad with zeros if layer is pruned
         t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
         out = h * t + (x.t()[self.order].t() * (1 - t))
         return out.t()[self.reverse_order].t(), t
@@ -155,7 +156,7 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch > 50:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
-    if epoch in prune_at and 1 == 2:
+    if epoch in prune_at:
         cursor, t_values = 0, 0
         while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
