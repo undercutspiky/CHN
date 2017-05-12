@@ -90,7 +90,7 @@ class Highway(nn.Module):
 
     def forward(self, x, train_mode=True):
         if self.completely_pruned:
-            return x, torch.zeros(x.size()).cuda()
+            return x, Variable(torch.zeros(x.size()).cuda())
         h = F.leaky_relu(self.linear(x))
         h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
