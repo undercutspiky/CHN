@@ -117,11 +117,17 @@ class Residual(nn.Module):
         """
         downsample = self.fan_in < self.fan_out
         if self.completely_pruned:
-            return x, Variable(torch.zeros(x.size()).cuda())
+            x_new = x
+            if downsample:
+                x_new = F.avg_pool2d(x_new, 2, 2)
+            if self.fan_in != self.fan_out:
+                x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
+                              , mode='replicate').squeeze(0)
+            return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
         self.batch_norm1.training = train_mode
         self.batch_norm2.training = train_mode
         h = self.conv1(F.leaky_relu(self.batch_norm1(x)))
-        h = self.conv2(F.leaky_relu(self.batch_norm2(h)))
+        h = self.conv2(F.leaky_relu(h))
         x_new = x
         if downsample:
             x_new = F.avg_pool2d(x_new, 2, 2)
@@ -133,9 +139,12 @@ class Residual(nn.Module):
         t = F.sigmoid(self.transform(h))
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # This is where self.order comes in use after the layer has been pruned
-        out = h * t + (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
+        out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
+        if t.size() != x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3).size():
+            print x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3).size(), t.size()
+        out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
-        return out, torch.sum(torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0]), dim=1)
+        return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
 
 
 class Net(nn.Module):
@@ -160,11 +169,12 @@ class Net(nn.Module):
         t_sum, temp = 0, None
         for layer in self.highway_layers:
             net, t = layer(net, train_mode)
-            t_sum += t
+            t_sum += torch.sum(t, dim=1)
             if get_t:
                 if temp is None:
                     temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
                 else:
+                    print temp.shape, np.expand_dims(t.data.cpu().numpy(), axis=1).shape
                     temp = np.append(temp, np.expand_dims(t.data.cpu().numpy(), axis=1), axis=1)
         net = F.avg_pool2d(net, 8, 1)
         net = torch.squeeze(net)
@@ -185,7 +195,7 @@ transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms
 epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
-prune_at = [90, 130, 200, 250]
+prune_at = [1, 90, 130, 200, 250]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -197,16 +207,15 @@ for epoch in xrange(1, epochs + 1):
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch > 60:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-
     if epoch == 1:
         for l in network.highway_layers:
-            l.prune(range(10), range(10, l.fan_out-10))
+            l.prune(range(10), range(10, l.fan_out))
     if epoch == 2:
         network.highway_layers[4].completely_pruned = True
-
+        network.highway_layers[5].completely_pruned = True
     if epoch in prune_at:
         cursor, t_values = 0, 0
-        while cursor < len(train_x):
+        while cursor < 256:# len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
             if cursor == 0:
                 t_values = t_batch
@@ -214,6 +223,7 @@ for epoch in xrange(1, epochs + 1):
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
+        print max_values.shape
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
@@ -221,6 +231,7 @@ for epoch in xrange(1, epochs + 1):
                     rem.append(j)
                 else:
                     ret.append(j)
+            print len(ret + rem)
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv2
