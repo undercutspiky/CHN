@@ -106,7 +106,7 @@ class Net(nn.Module):
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(6):
+        for i in xrange(7):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True, get_t=False):
@@ -149,6 +149,8 @@ for epoch in xrange(1, epochs + 1):
     sequence = torch.randperm(len(train_x)).cuda()
     train_x = train_x[sequence]
     train_y = train_y[sequence]
+
+    network.highway_layers[-1].completely_pruned = True
 
     if epoch > 30:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
