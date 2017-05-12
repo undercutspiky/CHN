@@ -122,7 +122,6 @@ class Residual(nn.Module):
         self.batch_norm2.training = train_mode
         h = self.conv1(F.leaky_relu(self.batch_norm1(x)))
         h = self.conv2(F.leaky_relu(self.batch_norm2(h)))
-        t = F.sigmoid(self.transform(h))
         x_new = x
         if downsample:
             x_new = F.avg_pool2d(x_new, 2, 2)
@@ -131,6 +130,7 @@ class Residual(nn.Module):
                           , mode='replicate').squeeze(0)
         # Padding - to match dimensions of pruned layer and x_new
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
+        t = F.sigmoid(self.transform(h))
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # This is where self.order comes in use after the layer has been pruned
         out = h * t + (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
