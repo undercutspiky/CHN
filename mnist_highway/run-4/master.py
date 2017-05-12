@@ -64,6 +64,7 @@ class Highway(nn.Module):
         if len(retain) == 0:
             self.completely_pruned = True
             print 'Completely Pruned !'
+            return
         # New linear layer
         linear = nn.Linear(self.fan_in, len(retain))
         linear.weight = torch.nn.Parameter(self.linear.weight[torch.cuda.LongTensor(retain)].data)
