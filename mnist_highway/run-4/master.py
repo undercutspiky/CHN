@@ -40,7 +40,7 @@ class Highway(nn.Module):
         # Look at forward function for more clarity
         self.order = range(fan_out)
         self.reverse_order = [0] * fan_out
-        self.pruned = False
+        self.completely_pruned = False
         for ii in xrange(fan_out):
             self.reverse_order[self.order[ii]] = ii
         self.order = torch.cuda.LongTensor(self.order)
@@ -52,7 +52,7 @@ class Highway(nn.Module):
         nn.init.constant(self.transform.bias, b_init)
         nn.init.uniform(self.linear.bias)
 
-    def prune(self, retain, remove=[]):
+    def prune(self, retain=[], remove=[]):
         """
         Create new layers and copy the parameters of the selected nodes.
         Current version can't be used to prune twice because it'll mess up self.order
@@ -61,8 +61,9 @@ class Highway(nn.Module):
         :param remove: list of nodes to remove (helps in setting self.order)
         :type remove: python List
         """
-        if len(remove) > 0:
-            self.pruned = True
+        if len(retain) == 0:
+            self.completely_pruned = True
+            print 'Completely Pruned !'
         # New linear layer
         linear = nn.Linear(self.fan_in, len(retain))
         linear.weight = torch.nn.Parameter(self.linear.weight[torch.cuda.LongTensor(retain)].data)
@@ -87,25 +88,24 @@ class Highway(nn.Module):
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
 
     def forward(self, x, train_mode=True):
+        if self.completely_pruned:
+            return x
         h = F.leaky_relu(self.linear(x))
         h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
         # self.batch_norm.training = train_mode
-        if self.pruned:
-            t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
-            out = h * t + (x.t()[self.order].t() * (1 - t))
-            return out.t()[self.reverse_order].t(), t
-        else:
-            return h * t + x * (1 - t), t
+        t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
+        out = h * t + (x.t()[self.order].t() * (1 - t))
+        return out.t()[self.reverse_order].t(), t
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=300):
+    def __init__(self, fan_in=784, fan_out=150):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(3):
+        for i in xrange(7):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True, get_t=False):
