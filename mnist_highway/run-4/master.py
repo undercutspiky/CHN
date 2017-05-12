@@ -61,7 +61,7 @@ class Highway(nn.Module):
         :param remove: list of nodes to remove (helps in setting self.order)
         :type remove: python List
         """
-        if len(retain) == 0:
+        if len(retain) == 0 or self.completely_pruned:
             self.completely_pruned = True
             print 'Completely Pruned !'
             return
