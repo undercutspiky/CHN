@@ -82,7 +82,7 @@ class Residual(nn.Module):
         if self.fan_in != self.fan_out:
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0,(self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2),
                           mode='replicate').squeeze(0)
-        t = F.sigmoid(self.transform(x_new))
+        t = F.sigmoid(self.transform(h))
         return h * t + x_new * (1 - t), torch.sum(torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0]), dim=1)
 
 
@@ -145,7 +145,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
-epochs = 250
+epochs = 200
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 for epoch in xrange(1, epochs + 1):
