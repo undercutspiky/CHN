@@ -108,14 +108,14 @@ class Residual(nn.Module):
             self.reverse_order[self.order[ii]] = ii
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
 
-    def forward(self, x, downsample=False, train_mode=True):
+    def forward(self, x, train_mode=True):
         """
         Using mode='replicate' while padding cuz constant is not yet implemented for 5-D input
         :param x: input
-        :param downsample: True for first conv layer in a 'stage'
         :param train_mode: Used for batch norm layer
         :return: output of the block
         """
+        downsample = self.fan_in < self.fan_out
         if self.completely_pruned:
             return x, Variable(torch.zeros(x.size()).cuda())
         self.batch_norm1.training = train_mode
@@ -159,7 +159,7 @@ class Net(nn.Module):
         net = self.conv1(x)
         t_sum, temp = 0, None
         for layer in self.highway_layers:
-            net, t = layer(net, train_mode, downsample=(layer.fan_in < layer.fan_out))
+            net, t = layer(net, train_mode)
             t_sum += t
             if get_t:
                 if temp is None:
