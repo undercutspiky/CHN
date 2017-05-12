@@ -81,7 +81,7 @@ class Highway(nn.Module):
         # bn.running_var = self.batch_norm.running_var
         # self.batch_norm = bn
         # Set self.order and reverse order
-        self.order = torch.cuda.LongTensor(retain + remove)
+        self.order = self.order[torch.cuda.LongTensor(retain + remove)]
         for ii in xrange(len(self.order)):
             self.reverse_order[self.order[ii]] = ii
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
