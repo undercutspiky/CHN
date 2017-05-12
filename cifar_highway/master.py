@@ -87,8 +87,6 @@ class Residual(nn.Module):
             return
         # New conv layer
         conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
-        print retain
-        print self.conv2.weight[torch.cuda.LongTensor(retain)]
         conv.weight = torch.nn.Parameter(self.conv2.weight[torch.cuda.LongTensor(retain)].data)
         conv.bias = torch.nn.Parameter(self.conv2.bias[torch.cuda.LongTensor(retain)].data)
         self.conv2 = conv
@@ -145,15 +143,15 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
         self.highway_layers = []
-        self.highway_layers.append(Residual(16, 16*width))
+        self.highway_layers.append(Residual(16, 16*width).cuda())
         for i in xrange(3):
-            self.highway_layers.append(Residual(16*width, 16*width))
-        self.highway_layers.append(Residual(16*width, 32*width, stride=2))
+            self.highway_layers.append(Residual(16*width, 16*width).cuda())
+        self.highway_layers.append(Residual(16*width, 32*width, stride=2).cuda())
         for i in xrange(3):
-            self.highway_layers.append(Residual(32*width, 32*width))
-        self.highway_layers.append(Residual(32*width, 64*width, stride=2))
+            self.highway_layers.append(Residual(32*width, 32*width).cuda())
+        self.highway_layers.append(Residual(32*width, 64*width, stride=2).cuda())
         for i in xrange(3):
-            self.highway_layers.append(Residual(64*width, 64*width))
+            self.highway_layers.append(Residual(64*width, 64*width).cuda())
         self.final = nn.Linear(64*width, 10)
         self.pruned = False
 
