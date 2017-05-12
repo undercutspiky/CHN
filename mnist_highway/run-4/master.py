@@ -90,7 +90,7 @@ class Highway(nn.Module):
 
     def forward(self, x, train_mode=True):
         if self.completely_pruned:
-            return x
+            return x, torch.zeros(x.size()).cuda()
         h = F.leaky_relu(self.linear(x))
         h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
@@ -101,12 +101,12 @@ class Highway(nn.Module):
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=96):
+    def __init__(self, fan_in=784, fan_out=128):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = []
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(10):
+        for i in xrange(6):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True, get_t=False):
