@@ -60,6 +60,7 @@ class Residual(nn.Module):
         self.order = range(fan_out)
         self.reverse_order = [0] * fan_out
         self.completely_pruned = False
+        self.pruned = False
         for ii in xrange(fan_out):
             self.reverse_order[self.order[ii]] = ii
         self.order = torch.cuda.LongTensor(self.order)
@@ -72,6 +73,45 @@ class Residual(nn.Module):
         nn.init.uniform(self.conv2.bias)
         # w_initialization(self.expand_x.weight)
         # nn.init.uniform(self.expand_x.bias)
+
+    def forward(self, x, train_mode=True):
+        """
+        Using mode='replicate' while padding cuz constant is not yet implemented for 5-D input
+        :param x: input
+        :param train_mode: Used for batch norm layer
+        :return: output of the block
+        """
+        downsample = self.fan_in < self.fan_out
+        if self.completely_pruned:
+            x_new = x
+            if downsample:
+                x_new = F.avg_pool2d(x_new, 2, 2)
+            if self.fan_in != self.fan_out:
+                x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
+                              , mode='replicate').squeeze(0)
+            return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
+        self.batch_norm1.training = train_mode
+        self.batch_norm2.training = train_mode
+        h = self.conv1(F.leaky_relu(self.batch_norm1(x)))
+        h = self.conv2(F.leaky_relu(self.batch_norm2(h)))
+        x_new = x
+        if downsample:
+            x_new = F.avg_pool2d(x_new, 2, 2)
+        if self.fan_in != self.fan_out:
+            x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
+                          , mode='replicate').squeeze(0)
+        if not self.pruned:
+            t = F.sigmoid(self.transform(h))
+            return h * t + x_new * (1 - t), torch.sum(torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0]), dim=1)
+        # Padding - to match dimensions of pruned layer and x_new
+        h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
+        t = F.sigmoid(self.transform(h))
+        t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
+        # This is where self.order comes in use after the layer has been pruned
+        out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
+        out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
+        out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
+        return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
 
     def prune(self, retain=[], remove=[]):
         """
@@ -105,42 +145,6 @@ class Residual(nn.Module):
             self.reverse_order[self.order[ii]] = ii
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
 
-    def forward(self, x, train_mode=True):
-        """
-        Using mode='replicate' while padding cuz constant is not yet implemented for 5-D input
-        :param x: input
-        :param train_mode: Used for batch norm layer
-        :return: output of the block
-        """
-        downsample = self.fan_in < self.fan_out
-        if self.completely_pruned:
-            x_new = x
-            if downsample:
-                x_new = F.avg_pool2d(x_new, 2, 2)
-            if self.fan_in != self.fan_out:
-                x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
-                              , mode='replicate').squeeze(0)
-            return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
-        self.batch_norm1.training = train_mode
-        self.batch_norm2.training = train_mode
-        h = self.conv1(F.leaky_relu(self.batch_norm1(x)))
-        h = self.conv2(F.leaky_relu(self.batch_norm2(h)))
-        x_new = x
-        if downsample:
-            x_new = F.avg_pool2d(x_new, 2, 2)
-        if self.fan_in != self.fan_out:
-            x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
-                          , mode='replicate').squeeze(0)
-        # Padding - to match dimensions of pruned layer and x_new
-        h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
-        t = F.sigmoid(self.transform(h))
-        t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
-        # This is where self.order comes in use after the layer has been pruned
-        out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
-        out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
-        out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
-        return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
-
 
 class Net(nn.Module):
     def __init__(self):
@@ -163,7 +167,7 @@ class Net(nn.Module):
         net = self.conv1(x)
         t_sum, temp1, temp2, temp3 = 0, None, None, None
         for iii in xrange(len(self.highway_layers)):
-            net, t = self.highway_layers[iii](net, train_mode)
+            net, t = self.highway_layers[iii](net, train_mode=train_mode)
             t_sum += torch.sum(t, dim=1)
             if get_t:
                 if iii < 4:
