@@ -137,13 +137,12 @@ def loss(y, targets):
 
 network = Net()
 network = network.cuda()
-print network
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0.0001)
 
-epochs = 150
+epochs = 200
 batch_size = 128
-prune_at = [20, 50, 70, 90, 110, 130]
+prune_at = [80, 130]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -151,7 +150,7 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
-    if epoch > 50:
+    if epoch > 60:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
     if epoch in prune_at:
         cursor, t_values = 0, 0
@@ -166,7 +165,7 @@ for epoch in xrange(1, epochs + 1):
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.2:
+                if max_values[i][j] < 0.1:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -179,8 +178,8 @@ for epoch in xrange(1, epochs + 1):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        if epoch > 10:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.10 * t_cost
+        if epoch > 50:
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.001 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
