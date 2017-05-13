@@ -95,13 +95,6 @@ class Residual(nn.Module):
         conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].data)
         conv.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = conv
-        # New batch normalization layer
-        bn = nn.BatchNorm2d(len(retain))
-        bn.weight = torch.nn.Parameter(self.batch_norm2.weight[torch.cuda.LongTensor(retain)].data)
-        bn.bias = torch.nn.Parameter(self.batch_norm2.bias[torch.cuda.LongTensor(retain)].data)
-        bn.running_mean = self.batch_norm2.running_mean
-        bn.running_var = self.batch_norm2.running_var
-        self.batch_norm2 = bn
         # Set self.order and reverse order
         self.order = self.order[torch.cuda.LongTensor(retain + remove)]
         for ii in xrange(len(self.order)):
@@ -127,7 +120,7 @@ class Residual(nn.Module):
         self.batch_norm1.training = train_mode
         self.batch_norm2.training = train_mode
         h = self.conv1(F.leaky_relu(self.batch_norm1(x)))
-        h = self.conv2(F.leaky_relu(h))
+        h = self.conv2(F.leaky_relu(self.batch_norm2(h)))
         x_new = x
         if downsample:
             x_new = F.avg_pool2d(x_new, 2, 2)
@@ -166,24 +159,33 @@ class Net(nn.Module):
 
     def forward(self, x, train_mode=True, get_t=False):
         net = self.conv1(x)
-        t_sum, temp = 0, None
-        for layer in self.highway_layers:
-            net, t = layer(net, train_mode)
+        t_sum, temp1, temp2, temp3 = 0, None, None, None
+        for iii in xrange(len(self.highway_layers)):
+            net, t = self.highway_layers[iii](net, train_mode)
             t_sum += torch.sum(t, dim=1)
             if get_t:
-                if temp is None:
-                    temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
+                if i < 4:
+                    temp1 = self.get_t_arr(temp1, t)
+                elif i < 8:
+                    temp2 = self.get_t_arr(temp2, t)
                 else:
-                    print temp.shape, np.expand_dims(t.data.cpu().numpy(), axis=1).shape
-                    temp = np.append(temp, np.expand_dims(t.data.cpu().numpy(), axis=1), axis=1)
+                    temp3 = self.get_t_arr(temp3, t)
         net = F.avg_pool2d(net, 8, 1)
         net = torch.squeeze(net)
         net = self.final(net)
         if get_t:
-            return net, temp
+            return net, [temp1, temp2, temp3]
         if train_mode:
             return net, torch.max(t_sum, dim=0)[0]
         return net
+
+    def get_t_arr(self, temp, t):
+        if temp is None:
+            temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
+            temp = np.expand_dims(temp, axis=0)
+        else:
+            temp = np.append(temp, np.expand_dims(t.data.cpu().numpy(), axis=1), axis=1)
+        return temp
 
 
 network = Net()
@@ -214,24 +216,34 @@ for epoch in xrange(1, epochs + 1):
         network.highway_layers[4].completely_pruned = True
         network.highway_layers[5].completely_pruned = True
     if epoch in prune_at:
-        cursor, t_values = 0, 0
+        cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < 256:# len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
             if cursor == 0:
-                t_values = t_batch
+                t_values1, t_values2, t_values3 = t_batch
             else:
-                t_values = np.append(t_values, t_batch, axis=0)
+                t_values1 = np.append(t_values1, t_batch[0], axis=0)
+                t_values2 = np.append(t_values2, t_batch[1], axis=0)
+                t_values3 = np.append(t_values3, t_batch[2], axis=0)
             cursor += batch_size
-        max_values = np.max(t_values, axis=0)
-        print max_values.shape
-        for i in xrange(len(max_values)):
+        max_values1 = np.max(t_values1, axis=0)
+        max_values2 = np.max(t_values2, axis=0)
+        max_values3 = np.max(t_values3, axis=0)
+        print "max_values shapes: ", max_values1.shape, max_values2.shape, max_values3.shape
+        for i in xrange(len(network.highway_layers)):
             ret, rem = [], []
-            for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.1:
+            if i < 4:
+                max_values = max_values1
+            elif i < 8:
+                max_values = max_values2
+            else:
+                max_values = max_values3
+            for j in xrange(len(max_values)):
+                if max_values[j] < 0.1:
                     rem.append(j)
                 else:
                     ret.append(j)
-            print len(ret + rem)
+            print "Length of retain + remove: ", len(ret + rem)
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv2
