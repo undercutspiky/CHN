@@ -105,7 +105,7 @@ class Net(nn.Module):
     def __init__(self, fan_in=784, fan_out=128):
         super(Net, self).__init__()
         self.linear = nn.Linear(fan_in, fan_out)
-        self.highway_layers = []
+        self.highway_layers = nn.ModuleList()
         self.final = nn.Linear(fan_out, 10)
         for i in xrange(6):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())

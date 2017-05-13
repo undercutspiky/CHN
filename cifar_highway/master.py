@@ -193,7 +193,6 @@ class Net(nn.Module):
 
 network = Net()
 network = network.cuda()
-print network
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
