@@ -100,9 +100,6 @@ class Residual(nn.Module):
         if self.fan_in != self.fan_out:
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
                           , mode='replicate').squeeze(0)
-        if not self.pruned:
-            t = F.sigmoid(self.transform(h))
-            return h * t + x_new * (1 - t), torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
         # Padding - to match dimensions of pruned layer and x_new
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
         t = F.sigmoid(self.transform(h))
@@ -152,7 +149,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
-        self.highway_layers = []
+        self.highway_layers = nn.ModuleList()
         self.highway_layers.append(Residual(16, 16*width).cuda())
         for _ in xrange(3):
             self.highway_layers.append(Residual(16*width, 16*width).cuda())
@@ -196,6 +193,7 @@ class Net(nn.Module):
 
 network = Net()
 network = network.cuda()
+print network
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
