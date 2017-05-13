@@ -201,6 +201,7 @@ epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 prune_at = [50, 90, 130, 200, 250]
+tc = 3e-3
 
 for epoch in xrange(1, epochs + 1):
 
@@ -251,6 +252,7 @@ for epoch in xrange(1, epochs + 1):
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv2
+        tc *= 5
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
@@ -258,7 +260,7 @@ for epoch in xrange(1, epochs + 1):
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
         if epoch > 20:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 3e-3 * t_cost
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + tc * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
