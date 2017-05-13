@@ -87,8 +87,8 @@ class Residual(nn.Module):
             if downsample:
                 x_new = F.avg_pool2d(x_new, 2, 2)
             if self.fan_in != self.fan_out:
-                x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
-                              , mode='replicate').squeeze(0)
+                x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2,
+                                                   (self.fan_out-self.fan_in)//2), mode='replicate').squeeze(0)
             return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
         self.batch_norm1.training = train_mode
         self.batch_norm2.training = train_mode
@@ -102,7 +102,7 @@ class Residual(nn.Module):
                           , mode='replicate').squeeze(0)
         if not self.pruned:
             t = F.sigmoid(self.transform(h))
-            return h * t + x_new * (1 - t), torch.sum(torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0]), dim=1)
+            return h * t + x_new * (1 - t), torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
         # Padding - to match dimensions of pruned layer and x_new
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
         t = F.sigmoid(self.transform(h))
