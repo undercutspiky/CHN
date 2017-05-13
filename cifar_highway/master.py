@@ -17,7 +17,7 @@ def unpickle(file):
 # Load CIFAR-10 data
 train_x = []
 train_y = []
-for i in xrange(1, 5):
+for i in xrange(1, 2):
     dict_ = unpickle('../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
@@ -85,6 +85,10 @@ class Residual(nn.Module):
             self.completely_pruned = True
             print 'Completely Pruned !'
             return
+        if len(retain) > self.conv2.weight.size(0):
+            for iii in xrange(self.conv2.weight.size(0), len(retain)):
+                remove.insert(0,retain[iii])
+            retain = retain[:self.conv2.weight.size(0)]
         # New conv layer
         conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
         conv.weight = torch.nn.Parameter(self.conv2.weight[torch.cuda.LongTensor(retain)].data)
@@ -164,9 +168,9 @@ class Net(nn.Module):
             net, t = self.highway_layers[iii](net, train_mode)
             t_sum += torch.sum(t, dim=1)
             if get_t:
-                if i < 4:
+                if iii < 4:
                     temp1 = self.get_t_arr(temp1, t)
-                elif i < 8:
+                elif iii < 8:
                     temp2 = self.get_t_arr(temp2, t)
                 else:
                     temp3 = self.get_t_arr(temp3, t)
@@ -182,7 +186,6 @@ class Net(nn.Module):
     def get_t_arr(self, temp, t):
         if temp is None:
             temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
-            temp = np.expand_dims(temp, axis=0)
         else:
             temp = np.append(temp, np.expand_dims(t.data.cpu().numpy(), axis=1), axis=1)
         return temp
@@ -215,6 +218,7 @@ for epoch in xrange(1, epochs + 1):
     if epoch == 2:
         network.highway_layers[4].completely_pruned = True
         network.highway_layers[5].completely_pruned = True
+        network.highway_layers[0].completely_pruned = True
     if epoch in prune_at:
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < 256:# len(train_x):
@@ -229,15 +233,14 @@ for epoch in xrange(1, epochs + 1):
         max_values1 = np.max(t_values1, axis=0)
         max_values2 = np.max(t_values2, axis=0)
         max_values3 = np.max(t_values3, axis=0)
-        print "max_values shapes: ", max_values1.shape, max_values2.shape, max_values3.shape
         for i in xrange(len(network.highway_layers)):
             ret, rem = [], []
             if i < 4:
-                max_values = max_values1
+                max_values = max_values1[i%4]
             elif i < 8:
-                max_values = max_values2
+                max_values = max_values2[i%4]
             else:
-                max_values = max_values3
+                max_values = max_values3[i%4]
             for j in xrange(len(max_values)):
                 if max_values[j] < 0.1:
                     rem.append(j)
