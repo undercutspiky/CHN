@@ -71,8 +71,8 @@ class Residual(nn.Module):
         nn.init.uniform(self.conv1.bias)
         w_initialization(self.conv2.weight)
         nn.init.uniform(self.conv2.bias)
-        # w_initialization(self.expand_x.weight)
-        # nn.init.uniform(self.expand_x.bias)
+        w_initialization(self.transform.weight)
+        nn.init.constant(self.transform.bias, -2.0)
 
     def forward(self, x, train_mode=True):
         """
@@ -121,6 +121,8 @@ class Residual(nn.Module):
         :param remove: list of nodes to remove (helps in setting self.order)
         :type remove: python List
         """
+        if len(remove) > 0:
+            self.pruned = True
         if len(retain) == 0 or self.completely_pruned:
             self.completely_pruned = True
             print 'Completely Pruned !'
@@ -152,16 +154,15 @@ class Net(nn.Module):
         self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
         self.highway_layers = []
         self.highway_layers.append(Residual(16, 16*width).cuda())
-        for i in xrange(3):
+        for _ in xrange(3):
             self.highway_layers.append(Residual(16*width, 16*width).cuda())
         self.highway_layers.append(Residual(16*width, 32*width, stride=2).cuda())
-        for i in xrange(3):
+        for _ in xrange(3):
             self.highway_layers.append(Residual(32*width, 32*width).cuda())
         self.highway_layers.append(Residual(32*width, 64*width, stride=2).cuda())
-        for i in xrange(3):
+        for _ in xrange(3):
             self.highway_layers.append(Residual(64*width, 64*width).cuda())
         self.final = nn.Linear(64*width, 10)
-        self.pruned = False
 
     def forward(self, x, train_mode=True, get_t=False):
         net = self.conv1(x)
@@ -258,8 +259,7 @@ for epoch in xrange(1, epochs + 1):
     while cursor < len(train_x):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
-        if not network.pruned:
-            t_cost_arr.append(t_cost.data[0][0])
+        t_cost_arr.append(t_cost.data[0][0])
         if epoch > 20:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 3e-3 * t_cost
         else:
@@ -268,8 +268,8 @@ for epoch in xrange(1, epochs + 1):
         nn.utils.clip_grad_norm(network.parameters(), 1.0)
         optimizer.step()
         cursor += batch_size
-    if not network.pruned:
-        print round(min(t_cost_arr)), round(max(t_cost_arr))
+
+    print round(min(t_cost_arr)), round(max(t_cost_arr))
 
     cursor, correct, total = 0, 0, 0
     while cursor < len(valid_x):
