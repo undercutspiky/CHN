@@ -17,7 +17,7 @@ def unpickle(file):
 # Load CIFAR-10 data
 train_x = []
 train_y = []
-for i in xrange(1, 2):
+for i in xrange(1, 5):
     dict_ = unpickle('../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
@@ -137,8 +137,6 @@ class Residual(nn.Module):
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # This is where self.order comes in use after the layer has been pruned
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
-        if t.size() != x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3).size():
-            print x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3).size(), t.size()
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
         return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
@@ -200,7 +198,7 @@ transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms
 epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
-prune_at = [1, 90, 130, 200, 250]
+prune_at = [50, 90, 130, 200, 250]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -212,6 +210,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch > 60:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
+    '''
     if epoch == 1:
         for l in network.highway_layers:
             l.prune(range(10), range(10, l.fan_out))
@@ -219,9 +218,10 @@ for epoch in xrange(1, epochs + 1):
         network.highway_layers[4].completely_pruned = True
         network.highway_layers[5].completely_pruned = True
         network.highway_layers[0].completely_pruned = True
+    '''
     if epoch in prune_at:
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
-        while cursor < 256:# len(train_x):
+        while cursor < len(train_x):
             outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
             if cursor == 0:
                 t_values1, t_values2, t_values3 = t_batch
@@ -246,7 +246,6 @@ for epoch in xrange(1, epochs + 1):
                     rem.append(j)
                 else:
                     ret.append(j)
-            print "Length of retain + remove: ", len(ret + rem)
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv2
