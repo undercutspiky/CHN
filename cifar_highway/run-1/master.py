@@ -118,7 +118,7 @@ class Residual(nn.Module):
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
         mask_h = torch.zeros(h.size()).cuda()
-        maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
+        maps_i_size = mask_h.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
         mask_h.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
         h *= Variable(mask_h)
         t = F.sigmoid(self.transform(h))
