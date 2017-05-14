@@ -42,7 +42,7 @@ valid_x = torch.from_numpy(valid_x).float().cuda()
 train_y = torch.from_numpy(train_y).cuda()
 valid_y = torch.from_numpy(valid_y).cuda()
 
-width = 1
+width = 5
 
 
 class Residual(nn.Module):
@@ -65,6 +65,7 @@ class Residual(nn.Module):
             self.reverse_order[self.order[ii]] = ii
         self.order = torch.cuda.LongTensor(self.order)
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
+        self.downsample = self.fan_in < self.fan_out
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
         w_initialization(self.conv1.weight)
@@ -81,10 +82,9 @@ class Residual(nn.Module):
         :param train_mode: Used for batch norm layer
         :return: output of the block
         """
-        downsample = self.fan_in < self.fan_out
         if self.completely_pruned:
             x_new = x
-            if downsample:
+            if self.downsample:
                 x_new = F.avg_pool2d(x_new, 2, 2)
             if self.fan_in != self.fan_out:
                 x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2,
@@ -95,7 +95,7 @@ class Residual(nn.Module):
         h = self.conv1(F.leaky_relu(self.batch_norm1(x)))
         h = self.conv2(F.leaky_relu(self.batch_norm2(h)))
         x_new = x
-        if downsample:
+        if self.downsample:
             x_new = F.avg_pool2d(x_new, 2, 2)
         if self.fan_in != self.fan_out:
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
@@ -151,6 +151,7 @@ class Net(nn.Module):
         self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
         self.highway_layers = nn.ModuleList()
         self.highway_layers.append(Residual(16, 16*width).cuda())
+        self.highway_layers[0].downsample = False
         for _ in xrange(3):
             self.highway_layers.append(Residual(16*width, 16*width).cuda())
         self.highway_layers.append(Residual(16*width, 32*width, stride=2).cuda())
@@ -197,11 +198,11 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
-epochs = 300
+epochs = 700
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
-prune_at = [50, 90, 130, 200, 250]
-tc = 3e-3
+prune_at = [150, 250, 350, 450, 550]
+tc = (3e-3)/width
 
 for epoch in xrange(1, epochs + 1):
 
@@ -209,9 +210,9 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
-    if epoch > 150:
+    if epoch > 650:
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-    elif epoch > 60:
+    elif epoch > 100:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     '''
     if epoch == 1:
@@ -252,7 +253,7 @@ for epoch in xrange(1, epochs + 1):
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv2
-        tc *= 5
+        tc *= 1.2
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
