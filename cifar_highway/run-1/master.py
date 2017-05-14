@@ -42,7 +42,7 @@ valid_x = torch.from_numpy(valid_x).float().cuda()
 train_y = torch.from_numpy(train_y).cuda()
 valid_y = torch.from_numpy(valid_y).cuda()
 
-width = 4
+width = 1
 
 
 class Residual(nn.Module):
@@ -89,6 +89,12 @@ class Residual(nn.Module):
             if self.fan_in != self.fan_out:
                 x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2,
                                                    (self.fan_out-self.fan_in)//2), mode='replicate').squeeze(0)
+                # To ameliorate mode='replicate'
+                mask_x = torch.zeros(x_new.size()).cuda()
+                maps_i = range((self.fan_out - self.fan_in) // 2, x_new.size(1) - (self.fan_out - self.fan_in) // 2)
+                maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
+                mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
+                x_new *= Variable(mask_x)
             return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
         self.batch_norm1.training = train_mode
         self.batch_norm2.training = train_mode
@@ -100,10 +106,25 @@ class Residual(nn.Module):
         if self.fan_in != self.fan_out:
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
                           , mode='replicate').squeeze(0)
+            # To ameliorate mode='replicate'
+            mask_x = torch.zeros(x_new.size()).cuda()
+            maps_i = range((self.fan_out - self.fan_in) // 2, x_new.size(1) - (self.fan_out - self.fan_in) // 2)
+            maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
+            mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
+            x_new *= Variable(mask_x)
+        # Number of feature maps in h
+        maps_i = range(h.size(1))
         # Padding - to match dimensions of pruned layer and x_new
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
+        # To ameliorate mode='replicate'
+        mask_h = torch.zeros(h.size()).cuda()
+        maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
+        mask_h.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
+        h *= Variable(mask_h)
         t = F.sigmoid(self.transform(h))
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
+        # To ameliorate mode='replicate'
+        t *= Variable(mask_h, requires_grad=False)
         # This is where self.order comes in use after the layer has been pruned
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
