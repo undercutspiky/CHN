@@ -90,11 +90,11 @@ class Residual(nn.Module):
                 x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2,
                                                    (self.fan_out-self.fan_in)//2), mode='replicate').squeeze(0)
                 # To ameliorate mode='replicate'
-                mask_x = torch.zeros(x_new.size()).cuda()
+                mask_x = torch.zeros(x_new.size())
                 maps_i = range((self.fan_out - self.fan_in) // 2, x_new.size(1) - (self.fan_out - self.fan_in) // 2)
-                maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
-                mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
-                x_new *= Variable(mask_x)
+                maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
+                mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
+                x_new = x_new * Variable(mask_x).cuda()
             return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
         self.batch_norm1.training = train_mode
         self.batch_norm2.training = train_mode
@@ -107,24 +107,24 @@ class Residual(nn.Module):
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
                           , mode='replicate').squeeze(0)
             # To ameliorate mode='replicate'
-            mask_x = torch.zeros(x_new.size()).cuda()
+            mask_x = torch.zeros(x_new.size())
             maps_i = range((self.fan_out - self.fan_in) // 2, x_new.size(1) - (self.fan_out - self.fan_in) // 2)
-            maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
-            mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
-            x_new *= Variable(mask_x)
+            maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
+            mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
+            x_new = x_new * Variable(mask_x).cuda()
         # Number of feature maps in h
         maps_i = range(h.size(1))
         # Padding - to match dimensions of pruned layer and x_new
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
-        mask_h = torch.zeros(h.size()).cuda()
-        maps_i_size = mask_h.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
-        mask_h.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
-        h *= Variable(mask_h)
+        mask_h = torch.zeros(h.size())
+        maps_i_size = mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
+        mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
+        h = h * Variable(mask_h, requires_grad=False).cuda()
         t = F.sigmoid(self.transform(h))
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
-        t *= Variable(mask_h, requires_grad=False)
+        t = t * Variable(mask_h, requires_grad=False).cuda()
         # This is where self.order comes in use after the layer has been pruned
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
@@ -223,7 +223,7 @@ epochs = 700
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 prune_at = [150, 250, 350, 450, 550]
-tc = 3e-3
+tc = (3e-3)/width
 
 for epoch in xrange(1, epochs + 1):
 
@@ -235,7 +235,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch > 100:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-    '''
+    '''    
     if epoch == 1:
         for l in network.highway_layers:
             l.prune(range(10), range(10, l.fan_out))
