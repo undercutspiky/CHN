@@ -64,6 +64,9 @@ class Highway(nn.Module):
             self.completely_pruned = True
             print 'Completely Pruned !'
             return
+        if len(retain) > self.linear.bias.size(0):
+            print "weird !!" , self.order, retain, remove, self.linear.bias
+            return
         # New linear layer
         linear = nn.Linear(self.fan_in, len(retain))
         linear.weight = torch.nn.Parameter(self.linear.weight[torch.cuda.LongTensor(retain)].data)
@@ -92,29 +95,31 @@ class Highway(nn.Module):
             return x, Variable(torch.zeros(x.size()).cuda())
         h = F.leaky_relu(self.linear(x))
         # Pad with zeros if layer is pruned
-        h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0)
+        h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0), mode='constant', value=0).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
         # self.batch_norm.training = train_mode
         # Pad with zeros if layer is pruned
-        t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
+        t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0), mode='constant', value=0).squeeze(0).squeeze(0)
         out = h * t + (x.t()[self.order].t() * (1 - t))
         return out.t()[self.reverse_order].t(), t
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=32):
+    def __init__(self, fan_in=784, fan_out=784):
         super(Net, self).__init__()
-        self.linear = nn.Linear(fan_in, fan_out)
+        # self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = nn.ModuleList()
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(15):
+        for i in xrange(3):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True, get_t=False):
-        net = F.leaky_relu(self.linear(x))
+        # net = F.leaky_relu(self.linear(x))
         temp, t_sum = None, 0
-        for layer in self.highway_layers:
-            net, t = layer(net, train_mode)
+        net, t = self.highway_layers[0](x, train_mode)
+        t_sum += torch.sum(t, dim=1)
+        for layer in xrange(1, len(self.highway_layers)):
+            net, t = self.highway_layers[layer](net, train_mode)
             t_sum += torch.sum(t, dim=1)
             if get_t:
                 if temp is None:
@@ -162,10 +167,11 @@ for epoch in xrange(1, epochs + 1):
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
+        np.save('max_values',max_values)
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.1:
+                if max_values[i][j] < 0.02:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -178,7 +184,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        if epoch > 50:
+        if  50 < epoch < prune_at[-1]:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.001 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
