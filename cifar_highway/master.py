@@ -66,6 +66,8 @@ class Residual(nn.Module):
         self.order = torch.cuda.LongTensor(self.order)
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
         self.downsample = self.fan_in < self.fan_out
+        self.mask_x = None
+        self.mask_h = None
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
         w_initialization(self.conv1.weight)
@@ -90,11 +92,12 @@ class Residual(nn.Module):
                 x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2,
                                                    (self.fan_out-self.fan_in)//2), mode='replicate').squeeze(0)
                 # To ameliorate mode='replicate'
-                mask_x = torch.zeros(x_new.size()).cuda()
-                maps_i = range((self.fan_out-self.fan_in)//2, x_new.size(1)-(self.fan_out-self.fan_in)//2)
-                maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
-                mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
-                x_new *= Variable(mask_x)
+                if self.mask_x is None or self.mask_x.size() != x_new.size():
+                    self.mask_x = torch.zeros(x_new.size())
+                    maps_i = range((self.fan_out - self.fan_in) // 2, x_new.size(1) - (self.fan_out - self.fan_in) // 2)
+                    maps_i_size = self.mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
+                    self.mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
+                x_new = x_new * Variable(self.mask_x).cuda()
             return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
         self.batch_norm1.training = train_mode
         self.batch_norm2.training = train_mode
@@ -107,24 +110,26 @@ class Residual(nn.Module):
             x_new = F.pad(x_new.unsqueeze(0), (0, 0, 0, 0, (self.fan_out-self.fan_in)//2, (self.fan_out-self.fan_in)//2)
                           , mode='replicate').squeeze(0)
             # To ameliorate mode='replicate'
-            mask_x = torch.zeros(x_new.size()).cuda()
-            maps_i = range((self.fan_out - self.fan_in) // 2, x_new.size(1) - (self.fan_out - self.fan_in) // 2)
-            maps_i_size = mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
-            mask_x.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
-            x_new *= Variable(mask_x)
+            if self.mask_x is None or self.mask_x.size() != x_new.size():
+                self.mask_x = torch.zeros(x_new.size())
+                maps_i = range((self.fan_out - self.fan_in) // 2, x_new.size(1) - (self.fan_out - self.fan_in) // 2)
+                maps_i_size = self.mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
+                self.mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
+            x_new = x_new * Variable(self.mask_x).cuda()
         # Number of feature maps in h
         maps_i = range(h.size(1))
         # Padding - to match dimensions of pruned layer and x_new
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
-        mask_h = torch.zeros(h.size()).cuda()
-        maps_i_size = mask_h.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)].size()
-        mask_h.permute(1, 0, 2, 3)[torch.cuda.LongTensor(maps_i)] = torch.ones(maps_i_size)
-        h *= Variable(mask_h)
+        if self.mask_h is None or self.mask_h.size() != h.size():
+            self.mask_h = torch.zeros(h.size())
+            maps_i_size = self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
+            self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
+        h = h * Variable(self.mask_h, requires_grad=False).cuda()
         t = F.sigmoid(self.transform(h))
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
-        t *= Variable(mask_h,requires_grad=False)
+        t = t * Variable(self.mask_h, requires_grad=False).cuda()
         # This is where self.order comes in use after the layer has been pruned
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
@@ -246,8 +251,8 @@ for epoch in xrange(1, epochs + 1):
     '''
     if epoch in prune_at:
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
-        while cursor < len(train_x):
-            outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
+        while cursor < len(valid_x):
+            outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
             if cursor == 0:
                 t_values1, t_values2, t_values3 = t_batch
             else:
@@ -267,7 +272,7 @@ for epoch in xrange(1, epochs + 1):
             else:
                 max_values = max_values3[i%4]
             for j in xrange(len(max_values)):
-                if max_values[j] < 0.1:
+                if max_values[j] < 0.02:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -277,11 +282,11 @@ for epoch in xrange(1, epochs + 1):
         tc *= 1.2
 
     cursor, t_cost_arr = 0, []
-    while cursor < len(train_x):
+    while cursor + batch_size < len(train_x): # So that masks are created only once -ignore last batch of smaller size
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        if epoch > 20:
+        if 20 < epoch < prune_at[-1]:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + tc * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
