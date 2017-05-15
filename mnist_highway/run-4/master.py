@@ -118,6 +118,11 @@ class Net(nn.Module):
         temp, t_sum = None, 0
         net, t = self.highway_layers[0](x, train_mode)
         t_sum += torch.sum(t, dim=1)
+        if get_t:
+            if temp is None:
+                temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
+            else:
+                temp = np.append(temp, np.expand_dims(t.data.cpu().numpy(), axis=1), axis=1)
         for layer in xrange(1, len(self.highway_layers)):
             net, t = self.highway_layers[layer](net, train_mode)
             t_sum += torch.sum(t, dim=1)
