@@ -93,7 +93,7 @@ class Highway(nn.Module):
     def forward(self, x, train_mode=True):
         if self.completely_pruned:
             return x, Variable(torch.zeros(x.size()).cuda())
-        h = F.leaky_relu(self.linear(x))
+        h = F.relu6(self.linear(x))
         # Pad with zeros if layer is pruned
         h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0), mode='constant', value=0).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
@@ -172,26 +172,26 @@ for epoch in xrange(1, epochs + 1):
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
-        for i in xrange(len(max_values)):
+        for i in reversed(range(len(max_values))):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.01:
+                if max_values[i][j] < 0.005:
                     rem.append(j)
                 else:
                     ret.append(j)
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i]
-        cursor, correct, total = 0, 0, 0
-        while cursor < len(valid_x):
-            outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
-            labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
-            _, predicted = torch.max(outputs.data, 1)
-            total += len(labels)
-            correct += (predicted == labels).sum()
-            cursor += batch_size
+            cursor, correct, total = 0, 0, 0
+            while cursor < len(valid_x):
+                outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+                labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
+                _, predicted = torch.max(outputs.data, 1)
+                total += len(labels)
+                correct += (predicted == labels).sum()
+                cursor += batch_size
 
-        print('Accuracy on valid set after pruning: %f %%' % (100.0 * correct / total))
+            print('Accuracy on valid set after pruning %d layer: %f %%' % (i, 100.0 * correct / total))
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
@@ -199,7 +199,7 @@ for epoch in xrange(1, epochs + 1):
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
         if 50 < epoch < prune_at[-1]:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.02 * t_cost
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.003 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
