@@ -134,7 +134,7 @@ class Residual(nn.Module):
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
-        return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
+        return out, torch.squeeze(torch.max(torch.max(h*t, dim=2)[0], dim=3)[0])
 
     def prune(self, retain=[], remove=[]):
         """
