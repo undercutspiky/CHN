@@ -182,6 +182,16 @@ for epoch in xrange(1, epochs + 1):
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i]
+        cursor, correct, total = 0, 0, 0
+        while cursor < len(valid_x):
+            outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+            labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
+            _, predicted = torch.max(outputs.data, 1)
+            total += len(labels)
+            correct += (predicted == labels).sum()
+            cursor += batch_size
+
+        print('Accuracy on valid set after pruning: %f %%' % (100.0 * correct / total))
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
