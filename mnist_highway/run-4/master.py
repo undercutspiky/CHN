@@ -110,7 +110,7 @@ class Net(nn.Module):
         # self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = nn.ModuleList()
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(3):
+        for i in xrange(4):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True, get_t=False):
@@ -150,9 +150,9 @@ network = network.cuda()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0.0001)
 
-epochs = 200
+epochs = 450
 batch_size = 128
-prune_at = [80, 130]
+prune_at = [80, 130, 200, 320]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -160,23 +160,22 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
-    if epoch > 60:
+    if epoch == 60:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
     if epoch in prune_at:
         cursor, t_values = 0, 0
-        while cursor < len(train_x):
-            outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
+        while cursor < len(valid_x):
+            outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
             if cursor == 0:
                 t_values = t_batch
             else:
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
-        np.save('max_values',max_values)
         for i in xrange(len(max_values)):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.02:
+                if max_values[i][j] < 0.01:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -190,7 +189,7 @@ for epoch in xrange(1, epochs + 1):
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
         if  50 < epoch < prune_at[-1]:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.001 * t_cost
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.02 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
