@@ -191,6 +191,10 @@ for epoch in xrange(1, epochs + 1):
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
+        for param in network.parameters():
+            param.requires_grad = False
+        for param in network.final.parameters():
+            param.requires_grad = False
         for i in reversed(range(len(max_values))):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
@@ -202,12 +206,11 @@ for epoch in xrange(1, epochs + 1):
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i]
             print('Accuracy on valid set after pruning %d layer: %f %%' % (i, validate()))
-            for param in network.parameters():
-                param.requires_grad = False
+
             for param in network.highway_layers[i].parameters():
                 param.requires_grad = True
             train()
-            print('Accuracy on valid set after pruning and training for 1 epoch %d layer: %f %%' % (i, validate()))
+            print('Accuracy on valid after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
     for param in network.parameters():
         param.requires_grad = True
 
