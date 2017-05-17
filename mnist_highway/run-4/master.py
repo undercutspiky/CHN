@@ -194,7 +194,7 @@ for epoch in xrange(1, epochs + 1):
         for param in network.parameters():
             param.requires_grad = False
         for param in network.final.parameters():
-            param.requires_grad = False
+            param.requires_grad = True 
         for i in reversed(range(len(max_values))):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
@@ -209,11 +209,12 @@ for epoch in xrange(1, epochs + 1):
 
             for param in network.highway_layers[i].parameters():
                 param.requires_grad = True
-            for param in network.parameters():
-                print param, param.requires_grad
+            train()
             train()
             print('Accuracy on valid after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
     for param in network.parameters():
+        if not param.requires_grad:
+            print param
         param.requires_grad = True
 
     cursor, t_cost_arr = 0, []
