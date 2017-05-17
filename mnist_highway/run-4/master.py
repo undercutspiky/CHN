@@ -198,7 +198,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        if  50 < epoch < prune_at[-1]:
+        if 50 < epoch < prune_at[-1]:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.02 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
