@@ -202,8 +202,14 @@ for epoch in xrange(1, epochs + 1):
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i]
             print('Accuracy on valid set after pruning %d layer: %f %%' % (i, validate()))
+            for param in network.parameters():
+                param.requires_grad = False
+            for param in network.highway_layers[i].parameters():
+                param.requires_grad = True
             train()
             print('Accuracy on valid set after pruning and training for 1 epoch %d layer: %f %%' % (i, validate()))
+            for param in network.parameters():
+                param.requires_grad = True
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
