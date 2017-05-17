@@ -139,11 +139,30 @@ class Net(nn.Module):
         return net
 
 
-def loss(y, targets):
-    temp = F.softmax(y)
-    l = [-torch.log(temp[i][targets[i].data[0]]) for i in range(y.size(0))]
-    return F.cross_entropy(y, targets), l
+def train():
+    cursor, t_cost_arr = 0, []
+    while cursor < len(train_x):
+        optimizer.zero_grad()
+        outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
+        t_cost_arr.append(t_cost.data[0][0])
+        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.003 * t_cost
+        loss.backward()
+        nn.utils.clip_grad_norm(network.parameters(), 1.0)
+        optimizer.step()
+        cursor += batch_size
+    print round(min(t_cost_arr)), round(max(t_cost_arr))
 
+
+def validate():
+    cursor, correct, total = 0, 0, 0
+    while cursor < len(valid_x):
+        outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+        labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
+        _, predicted = torch.max(outputs.data, 1)
+        total += len(labels)
+        correct += (predicted == labels).sum()
+        cursor += batch_size
+    return 100.0 * correct / total
 
 network = Net()
 network = network.cuda()
@@ -182,16 +201,9 @@ for epoch in xrange(1, epochs + 1):
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i]
-            cursor, correct, total = 0, 0, 0
-            while cursor < len(valid_x):
-                outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
-                labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
-                _, predicted = torch.max(outputs.data, 1)
-                total += len(labels)
-                correct += (predicted == labels).sum()
-                cursor += batch_size
-
-            print('Accuracy on valid set after pruning %d layer: %f %%' % (i, 100.0 * correct / total))
+            print('Accuracy on valid set after pruning %d layer: %f %%' % (i, validate()))
+            train()
+            print('Accuracy on valid set after pruning and training for 1 epoch %d layer: %f %%' % (i, validate()))
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
