@@ -171,7 +171,7 @@ optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0
 
 epochs = 450
 batch_size = 128
-prune_at = [80, 130, 200, 320]
+prune_at = [70, 130, 200, 320]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -179,7 +179,7 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
-    if epoch == 60:
+    if epoch == 50:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
     if epoch in prune_at:
         cursor, t_values = 0, 0
@@ -219,7 +219,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        if 50 < epoch < prune_at[-1]:
+        if 40 < epoch < prune_at[-1]:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.003 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
