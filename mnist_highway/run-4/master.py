@@ -171,7 +171,7 @@ optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0
 
 epochs = 450
 batch_size = 128
-prune_at = [70, 130, 200, 320]
+prune_at = [30, 130, 200, 320]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -209,6 +209,8 @@ for epoch in xrange(1, epochs + 1):
 
             for param in network.highway_layers[i].parameters():
                 param.requires_grad = True
+            for param in network.parameters():
+                print param, param.requires_grad
             train()
             print('Accuracy on valid after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
     for param in network.parameters():
@@ -219,7 +221,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        if 40 < epoch < prune_at[-1]:
+        if 20 < epoch < prune_at[-1]:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.003 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
