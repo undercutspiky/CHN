@@ -198,7 +198,7 @@ for epoch in xrange(1, epochs + 1):
         for i in reversed(range(len(max_values))):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.005:
+                if max_values[i][j] <= 0.002 * i:
                     rem.append(j)
                 else:
                     ret.append(j)
