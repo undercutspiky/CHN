@@ -208,8 +208,8 @@ for epoch in xrange(1, epochs + 1):
                 param.requires_grad = True
             train()
             print('Accuracy on valid set after pruning and training for 1 epoch %d layer: %f %%' % (i, validate()))
-            for param in network.parameters():
-                param.requires_grad = True
+    for param in network.parameters():
+        param.requires_grad = True
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
