@@ -42,7 +42,7 @@ valid_x = torch.from_numpy(valid_x).float().cuda()
 train_y = torch.from_numpy(train_y).cuda()
 valid_y = torch.from_numpy(valid_y).cuda()
 
-width = 1
+width = 4
 
 
 class Residual(nn.Module):
@@ -134,7 +134,7 @@ class Residual(nn.Module):
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
-        return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
+        return out, torch.squeeze(torch.max(torch.max(t*t, dim=2)[0], dim=3)[0])
 
     def prune(self, retain=[], remove=[]):
         """
@@ -224,10 +224,10 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
-epochs = 700
+epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
-prune_at = [150, 250, 350, 450, 550]
+prune_at = [150, 250]
 tc = (3e-3)/width
 
 for epoch in xrange(1, epochs + 1):
@@ -236,9 +236,9 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
-    if epoch > 650:
+    if epoch == 120:
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-    elif epoch > 100:
+    elif epoch == 100:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     '''    
     if epoch == 1:
