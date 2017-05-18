@@ -64,6 +64,9 @@ class Highway(nn.Module):
             self.completely_pruned = True
             print 'Completely Pruned !'
             return
+        if len(retain) > self.linear.bias.size(0):
+            print "weird !!" , self.order, retain, remove, self.linear.bias
+            return
         # New linear layer
         linear = nn.Linear(self.fan_in, len(retain))
         linear.weight = torch.nn.Parameter(self.linear.weight[torch.cuda.LongTensor(retain)].data)
@@ -90,31 +93,38 @@ class Highway(nn.Module):
     def forward(self, x, train_mode=True):
         if self.completely_pruned:
             return x, Variable(torch.zeros(x.size()).cuda())
-        h = F.leaky_relu(self.linear(x))
+        h = F.relu6(self.linear(x))
         # Pad with zeros if layer is pruned
-        h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0)).squeeze(0).squeeze(0)
+        h = F.pad(h.unsqueeze(0).unsqueeze(0), (0, x.size(1) - h.size(1), 0, 0), mode='constant', value=0).squeeze(0).squeeze(0)
         t = F.sigmoid(self.transform(h))
         # self.batch_norm.training = train_mode
         # Pad with zeros if layer is pruned
-        t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0)).squeeze(0).squeeze(0)
+        t = F.pad(t.unsqueeze(0).unsqueeze(0), (0, x.size(1) - t.size(1), 0, 0), mode='constant', value=0).squeeze(0).squeeze(0)
         out = h * t + (x.t()[self.order].t() * (1 - t))
         return out.t()[self.reverse_order].t(), t
 
 
 class Net(nn.Module):
-    def __init__(self, fan_in=784, fan_out=32):
+    def __init__(self, fan_in=784, fan_out=784):
         super(Net, self).__init__()
-        self.linear = nn.Linear(fan_in, fan_out)
+        # self.linear = nn.Linear(fan_in, fan_out)
         self.highway_layers = nn.ModuleList()
         self.final = nn.Linear(fan_out, 10)
-        for i in xrange(15):
+        for i in xrange(4):
             self.highway_layers.append(Highway(fan_out, fan_out).cuda())
 
     def forward(self, x, train_mode=True, get_t=False):
-        net = F.leaky_relu(self.linear(x))
+        # net = F.leaky_relu(self.linear(x))
         temp, t_sum = None, 0
-        for layer in self.highway_layers:
-            net, t = layer(net, train_mode)
+        net, t = self.highway_layers[0](x, train_mode)
+        t_sum += torch.sum(t, dim=1)
+        if get_t:
+            if temp is None:
+                temp = np.expand_dims(t.data.cpu().numpy(), axis=1)
+            else:
+                temp = np.append(temp, np.expand_dims(t.data.cpu().numpy(), axis=1), axis=1)
+        for layer in xrange(1, len(self.highway_layers)):
+            net, t = self.highway_layers[layer](net, train_mode)
             t_sum += torch.sum(t, dim=1)
             if get_t:
                 if temp is None:
@@ -129,20 +139,39 @@ class Net(nn.Module):
         return net
 
 
-def loss(y, targets):
-    temp = F.softmax(y)
-    l = [-torch.log(temp[i][targets[i].data[0]]) for i in range(y.size(0))]
-    return F.cross_entropy(y, targets), l
+def train():
+    cursor, t_cost_arr = 0, []
+    while cursor < len(train_x):
+        optimizer.zero_grad()
+        outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
+        t_cost_arr.append(t_cost.data[0][0])
+        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.003 * t_cost
+        loss.backward()
+        nn.utils.clip_grad_norm(network.parameters(), 1.0)
+        optimizer.step()
+        cursor += batch_size
+    print round(min(t_cost_arr)), round(max(t_cost_arr))
 
+
+def validate():
+    cursor, correct, total = 0, 0, 0
+    while cursor < len(valid_x):
+        outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+        labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
+        _, predicted = torch.max(outputs.data, 1)
+        total += len(labels)
+        correct += (predicted == labels).sum()
+        cursor += batch_size
+    return 100.0 * correct / total
 
 network = Net()
 network = network.cuda()
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.1, momentum=0.7, weight_decay=0.0001)
 
-epochs = 200
+epochs = 450
 batch_size = 128
-prune_at = [80, 130]
+prune_at = [30, 130, 200, 320]
 
 for epoch in xrange(1, epochs + 1):
 
@@ -150,36 +179,51 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
-    if epoch > 60:
+    if epoch == 50:
         optimizer = optim.SGD(network.parameters(), lr=0.01, momentum=0.7, weight_decay=0.0001)
     if epoch in prune_at:
         cursor, t_values = 0, 0
-        while cursor < len(train_x):
-            outputs, t_batch = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]), get_t=True)
+        while cursor < len(valid_x):
+            outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
             if cursor == 0:
                 t_values = t_batch
             else:
                 t_values = np.append(t_values, t_batch, axis=0)
             cursor += batch_size
         max_values = np.max(t_values, axis=0)
-        for i in xrange(len(max_values)):
+        for param in network.parameters():
+            param.requires_grad = False
+        for param in network.final.parameters():
+            param.requires_grad = True 
+        for i in reversed(range(len(max_values))):
             ret, rem = [], []
             for j in xrange(len(max_values[i])):
-                if max_values[i][j] < 0.1:
+                if max_values[i][j] <= 0.002 * i:
                     rem.append(j)
                 else:
                     ret.append(j)
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i]
+            print('Accuracy on valid set after pruning %d layer: %f %%' % (i, validate()))
+
+            for param in network.highway_layers[i].parameters():
+                param.requires_grad = True
+            train()
+            train()
+            print('Accuracy on valid after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
+    for param in network.parameters():
+        if not param.requires_grad:
+            print param
+        param.requires_grad = True
 
     cursor, t_cost_arr = 0, []
     while cursor < len(train_x):
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        if epoch > 50:
-            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.001 * t_cost
+        if 20 < epoch < prune_at[-1]:
+            loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + 0.003 * t_cost
         else:
             loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
