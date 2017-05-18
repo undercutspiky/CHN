@@ -134,7 +134,7 @@ class Residual(nn.Module):
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
-        return out, torch.squeeze(torch.max(torch.max(t*t, dim=2)[0], dim=3)[0])
+        return out, torch.squeeze(torch.max(torch.max(t*h, dim=2)[0], dim=3)[0])
 
     def prune(self, retain=[], remove=[]):
         """
@@ -218,6 +218,33 @@ class Net(nn.Module):
         return temp
 
 
+def train():
+    cursor, t_cost_arr = 0, []
+    while cursor + batch_size <= len(train_x):  # So that masks are created only once -ignore last batch of smaller size
+        optimizer.zero_grad()
+        outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
+        t_cost_arr.append(t_cost.data[0][0])
+        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + tc * t_cost
+        loss.backward()
+        nn.utils.clip_grad_norm(network.parameters(), 1.0)
+        optimizer.step()
+        cursor += batch_size
+
+    print round(min(t_cost_arr)), round(max(t_cost_arr))
+
+
+def validate():
+    cursor, correct, total = 0, 0, 0
+    while cursor < len(valid_x):
+        outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+        labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
+        _, predicted = torch.max(outputs.data, 1)
+        total += len(labels)
+        correct += (predicted == labels).sum()
+        cursor += batch_size
+
+    return 100.0 * correct / total
+
 network = Net()
 network = network.cuda()
 criterion = nn.CrossEntropyLoss()
@@ -263,7 +290,11 @@ for epoch in xrange(1, epochs + 1):
         max_values1 = np.max(t_values1, axis=0)
         max_values2 = np.max(t_values2, axis=0)
         max_values3 = np.max(t_values3, axis=0)
-        for i in xrange(len(network.highway_layers)):
+        for param in network.parameters():
+            param.requires_grad = False
+        for param in network.final.parameters():
+            param.requires_grad = True
+        for i in reversed(range(len(network.highway_layers))):
             ret, rem = [], []
             if i < 4:
                 max_values = max_values1[i%4]
@@ -279,6 +310,14 @@ for epoch in xrange(1, epochs + 1):
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv2
+            print('Accuracy on valid set after pruning %d layer: %f %%' % (i, validate()))
+
+            for param in network.highway_layers[i].parameters():
+                param.requires_grad = True
+            train()
+            print('Accuracy on valid after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
+        for param in network.parameters():
+            param.requires_grad = True
         tc *= 1.2
 
     cursor, t_cost_arr = 0, []
@@ -298,12 +337,5 @@ for epoch in xrange(1, epochs + 1):
     print round(min(t_cost_arr)), round(max(t_cost_arr))
 
     cursor, correct, total = 0, 0, 0
-    while cursor < len(valid_x):
-        outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
-        labels = valid_y[cursor:min(cursor + batch_size, len(valid_x))]
-        _, predicted = torch.max(outputs.data, 1)
-        total += len(labels)
-        correct += (predicted == labels).sum()
-        cursor += batch_size
 
-    print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, 100.0 * correct / total))
+    print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, validate()))
