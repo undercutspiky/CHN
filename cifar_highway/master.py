@@ -18,7 +18,7 @@ def unpickle(file):
 train_x = []
 train_y = []
 for i in xrange(1, 5):
-    dict_ = unpickle('../data/CIFAR-10/data_batch_' + str(i))
+    dict_ = unpickle('../../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
         train_y = dict_['labels']
@@ -27,7 +27,7 @@ for i in xrange(1, 5):
         train_y.extend(dict_['labels'])
 
 train_y = np.array(train_y)
-dict_ = unpickle('../data/CIFAR-10/data_batch_5')
+dict_ = unpickle('../../data/CIFAR-10/data_batch_5')
 valid_x = np.array(dict_['data'])/255.0
 valid_y = np.array(dict_['labels'])
 del dict_
@@ -48,13 +48,11 @@ width = 4
 class Residual(nn.Module):
     def __init__(self, fan_in, fan_out, stride=1, w_init='xavier_normal'):
         super(Residual, self).__init__()
-        self.fan_in, self.fan_out = fan_in, fan_out
-        self.conv1 = nn.Conv2d(fan_in, fan_out, 3, stride=stride, padding=1)
-        self.conv2 = nn.Conv2d(fan_out, fan_out, 3, padding=1)
+        self.fan_in, self.fan_out, self.stride = fan_in, fan_out, stride
+        self.conv = nn.Conv2d(fan_in, fan_out, 3, stride=stride, padding=1)
         self.transform = nn.Conv2d(fan_out, fan_out, 3, padding=1)
         # self.expand_x = nn.Conv2d(fan_in, fan_out, 1)
-        self.batch_norm1 = nn.BatchNorm2d(fan_in)
-        self.batch_norm2 = nn.BatchNorm2d(fan_out)
+        self.batch_norm = nn.BatchNorm2d(fan_in)
         # The number of the node in the previous layer to which output of each node in this layer is added
         # Look at forward function for more clarity
         self.order = range(fan_out)
@@ -70,10 +68,8 @@ class Residual(nn.Module):
         self.mask_h = None
         # Get weight initialization function
         w_initialization = getattr(nn.init, w_init)
-        w_initialization(self.conv1.weight)
-        nn.init.uniform(self.conv1.bias)
-        w_initialization(self.conv2.weight)
-        nn.init.uniform(self.conv2.bias)
+        w_initialization(self.conv.weight)
+        nn.init.uniform(self.conv.bias)
         w_initialization(self.transform.weight)
         nn.init.constant(self.transform.bias, -2.0)
 
@@ -99,10 +95,9 @@ class Residual(nn.Module):
                     self.mask_x.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
                 x_new = x_new * Variable(self.mask_x).cuda()
             return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
-        self.batch_norm1.training = train_mode
-        self.batch_norm2.training = train_mode
-        h = self.conv1(F.relu6(self.batch_norm1(x)))
-        h = self.conv2(F.relu6(self.batch_norm2(h)))
+        self.batch_norm.training = train_mode
+        h = self.conv(F.relu6(self.batch_norm(x)))
+        t = F.sigmoid(self.transform(h))
         x_new = x
         if self.downsample:
             x_new = F.avg_pool2d(x_new, 2, 2)
@@ -126,7 +121,6 @@ class Residual(nn.Module):
             maps_i_size = self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
             self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
         h = h * Variable(self.mask_h, requires_grad=False).cuda()
-        t = F.sigmoid(self.transform(x_new))
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
         t = t * Variable(self.mask_h, requires_grad=False).cuda()
@@ -150,18 +144,19 @@ class Residual(nn.Module):
             self.completely_pruned = True
             print 'Completely Pruned !'
             return
-        if len(retain) > self.conv2.weight.size(0):
-            for iii in xrange(self.conv2.weight.size(0), len(retain)):
-                remove.insert(0,retain[iii])
-            retain = retain[:self.conv2.weight.size(0)]
+        if len(retain) > self.conv.weight.size(0):
+            for iii in xrange(self.conv.weight.size(0), len(retain)):
+                remove.insert(0, retain[iii])
+            retain = retain[:self.conv.weight.size(0)]
         # New conv layer
-        conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
-        conv.weight = torch.nn.Parameter(self.conv2.weight[torch.cuda.LongTensor(retain)].data)
-        conv.bias = torch.nn.Parameter(self.conv2.bias[torch.cuda.LongTensor(retain)].data)
-        self.conv2 = conv
+        conv = nn.Conv2d(self.fan_out, len(retain), 3, stride=self.stride, padding=1)
+        conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
+        conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
+        self.conv = conv
         # New transform layer
         conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
-        conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].data)
+        conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].
+                                         permute(1, 0, 2, 3)[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data)
         conv.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = conv
         # Set self.order and reverse order
@@ -178,13 +173,13 @@ class Net(nn.Module):
         self.highway_layers = nn.ModuleList()
         self.highway_layers.append(Residual(16, 16*width).cuda())
         self.highway_layers[0].downsample = False
-        for _ in xrange(3):
+        for _ in xrange(5):
             self.highway_layers.append(Residual(16*width, 16*width).cuda())
         self.highway_layers.append(Residual(16*width, 32*width, stride=2).cuda())
-        for _ in xrange(3):
+        for _ in xrange(5):
             self.highway_layers.append(Residual(32*width, 32*width).cuda())
         self.highway_layers.append(Residual(32*width, 64*width, stride=2).cuda())
-        for _ in xrange(3):
+        for _ in xrange(5):
             self.highway_layers.append(Residual(64*width, 64*width).cuda())
         self.final = nn.Linear(64*width, 10)
 
@@ -195,9 +190,9 @@ class Net(nn.Module):
             net, t = self.highway_layers[iii](net, train_mode=train_mode)
             t_sum += torch.sum(t, dim=1)
             if get_t:
-                if iii < 4:
+                if iii < 6:
                     temp1 = self.get_t_arr(temp1, t)
-                elif iii < 8:
+                elif iii < 12:
                     temp2 = self.get_t_arr(temp2, t)
                 else:
                     temp3 = self.get_t_arr(temp3, t)
@@ -270,7 +265,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch == 80:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-    '''    
+
     if epoch == 1:
         for l in network.highway_layers:
             l.prune(range(10), range(10, l.fan_out))
@@ -278,7 +273,7 @@ for epoch in xrange(1, epochs + 1):
         network.highway_layers[4].completely_pruned = True
         network.highway_layers[5].completely_pruned = True
         network.highway_layers[0].completely_pruned = True
-    '''
+    
     if epoch in prune_at:
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
@@ -299,12 +294,12 @@ for epoch in xrange(1, epochs + 1):
             param.requires_grad = True
         for i in reversed(range(len(network.highway_layers))):
             ret, rem = [], []
-            if i < 4:
-                max_values = max_values1[i%4]
-            elif i < 8:
-                max_values = max_values2[i%4]
+            if i < 6:
+                max_values = max_values1[i%6]
+            elif i < 12:
+                max_values = max_values2[i%6]
             else:
-                max_values = max_values3[i%4]
+                max_values = max_values3[i%6]
             for j in xrange(len(max_values)):
                 if max_values[j] < 0.01:
                     rem.append(j)
@@ -312,7 +307,7 @@ for epoch in xrange(1, epochs + 1):
                     ret.append(j)
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
-                print network.highway_layers[i].conv2
+                print network.highway_layers[i].conv
             print('Accuracy on valid set after pruning %d layer: %f %%' % (i, validate()))
 
             for param in network.highway_layers[i].parameters():
