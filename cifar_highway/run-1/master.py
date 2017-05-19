@@ -101,8 +101,8 @@ class Residual(nn.Module):
             return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
         self.batch_norm1.training = train_mode
         self.batch_norm2.training = train_mode
-        h = self.conv1(F.leaky_relu(self.batch_norm1(x)))
-        h = self.conv2(F.leaky_relu(self.batch_norm2(h)))
+        h = self.conv1(F.relu6(self.batch_norm1(x)))
+        h = self.conv2(F.relu6(self.batch_norm2(h)))
         x_new = x
         if self.downsample:
             x_new = F.avg_pool2d(x_new, 2, 2)
@@ -134,7 +134,7 @@ class Residual(nn.Module):
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
-        return out, torch.squeeze(torch.max(torch.max(t*h, dim=2)[0], dim=3)[0])
+        return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
 
     def prune(self, retain=[], remove=[]):
         """
@@ -248,7 +248,7 @@ def validate():
 network = Net()
 network = network.cuda()
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
+optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
 epochs = 300
@@ -263,9 +263,12 @@ for epoch in xrange(1, epochs + 1):
     train_x = train_x[sequence]
     train_y = train_y[sequence]
 
+    if epoch == 2:
+        optimizer = optim.SGD(network.parameters(), lr=0.05, momentum=0.9, weight_decay=5e-4, nesterov=True)
+
     if epoch == 120:
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-    elif epoch == 100:
+    elif epoch == 80:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     '''    
     if epoch == 1:
