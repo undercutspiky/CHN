@@ -18,7 +18,7 @@ def unpickle(file):
 train_x = []
 train_y = []
 for i in xrange(1, 5):
-    dict_ = unpickle('../../data/CIFAR-10/data_batch_' + str(i))
+    dict_ = unpickle('../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
         train_y = dict_['labels']
@@ -27,7 +27,7 @@ for i in xrange(1, 5):
         train_y.extend(dict_['labels'])
 
 train_y = np.array(train_y)
-dict_ = unpickle('../../data/CIFAR-10/data_batch_5')
+dict_ = unpickle('../data/CIFAR-10/data_batch_5')
 valid_x = np.array(dict_['data'])/255.0
 valid_y = np.array(dict_['labels'])
 del dict_
@@ -154,9 +154,9 @@ class Residual(nn.Module):
         conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
         # New transform layer
-        conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
+        conv = nn.Conv2d(len(retain), len(retain), 3, padding=1)
         conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].
-                                         permute(1, 0, 2, 3)[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data)
+                                         permute(1, 0, 2, 3)[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data.cpu().cuda())
         conv.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = conv
         # Set self.order and reverse order
@@ -265,7 +265,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch == 80:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-
+    '''
     if epoch == 1:
         for l in network.highway_layers:
             l.prune(range(10), range(10, l.fan_out))
@@ -273,7 +273,7 @@ for epoch in xrange(1, epochs + 1):
         network.highway_layers[4].completely_pruned = True
         network.highway_layers[5].completely_pruned = True
         network.highway_layers[0].completely_pruned = True
-    
+    '''
     if epoch in prune_at:
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
