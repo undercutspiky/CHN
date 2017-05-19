@@ -48,7 +48,7 @@ width = 4
 class Residual(nn.Module):
     def __init__(self, fan_in, fan_out, stride=1, w_init='xavier_normal'):
         super(Residual, self).__init__()
-        self.fan_in, self.fan_out = fan_in, fan_out
+        self.fan_in, self.fan_out, self.stride = fan_in, fan_out, stride
         self.conv = nn.Conv2d(fan_in, fan_out, 3, stride=stride, padding=1)
         self.transform = nn.Conv2d(fan_out, fan_out, 3, padding=1)
         # self.expand_x = nn.Conv2d(fan_in, fan_out, 1)
@@ -149,7 +149,7 @@ class Residual(nn.Module):
                 remove.insert(0, retain[iii])
             retain = retain[:self.conv.weight.size(0)]
         # New conv layer
-        conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
+        conv = nn.Conv2d(self.fan_out, len(retain), 3, stride=self.stride, padding=1)
         conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
         conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
@@ -189,9 +189,9 @@ class Net(nn.Module):
             net, t = self.highway_layers[iii](net, train_mode=train_mode)
             t_sum += torch.sum(t, dim=1)
             if get_t:
-                if iii < 4:
+                if iii < 6:
                     temp1 = self.get_t_arr(temp1, t)
-                elif iii < 8:
+                elif iii < 12:
                     temp2 = self.get_t_arr(temp2, t)
                 else:
                     temp3 = self.get_t_arr(temp3, t)
@@ -264,7 +264,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch == 80:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-
+    '''
     if epoch == 1:
         for l in network.highway_layers:
             l.prune(range(10), range(10, l.fan_out))
@@ -272,7 +272,7 @@ for epoch in xrange(1, epochs + 1):
         network.highway_layers[4].completely_pruned = True
         network.highway_layers[5].completely_pruned = True
         network.highway_layers[0].completely_pruned = True
-    
+    '''
     if epoch in prune_at:
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
@@ -293,12 +293,12 @@ for epoch in xrange(1, epochs + 1):
             param.requires_grad = True
         for i in reversed(range(len(network.highway_layers))):
             ret, rem = [], []
-            if i < 4:
-                max_values = max_values1[i%4]
-            elif i < 8:
-                max_values = max_values2[i%4]
+            if i < 6:
+                max_values = max_values1[i%6]
+            elif i < 12:
+                max_values = max_values2[i%6]
             else:
-                max_values = max_values3[i%4]
+                max_values = max_values3[i%6]
             for j in xrange(len(max_values)):
                 if max_values[j] < 0.01:
                     rem.append(j)
