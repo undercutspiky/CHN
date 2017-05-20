@@ -17,7 +17,7 @@ def unpickle(file):
 # Load CIFAR-10 data
 train_x = []
 train_y = []
-for i in xrange(1, 5):
+for i in xrange(1, 2):
     dict_ = unpickle('../../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
@@ -149,13 +149,15 @@ class Residual(nn.Module):
                 remove.insert(0, retain[iii])
             retain = retain[:self.conv.weight.size(0)]
         # New conv layer
-        conv = nn.Conv2d(self.fan_out, len(retain), 3, stride=self.stride, padding=1)
+        conv = nn.Conv2d(self.fan_in, len(retain), 3, stride=self.stride, padding=1)
         conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
         conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
         # New transform layer
-        conv = nn.Conv2d(self.fan_out, len(retain), 3, padding=1)
-        conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].data)
+        conv = nn.Conv2d(len(retain), len(retain), 3, padding=1)
+        # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
+        conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
+                                         [torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data.cpu().cuda())
         conv.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = conv
         # Set self.order and reverse order
@@ -170,14 +172,14 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, 3, padding=1)
         self.highway_layers = nn.ModuleList()
-        self.highway_layers.append(Residual(16, 16*width).cuda())
-        self.highway_layers[0].downsample = False
+        self.highway_layers.append(nn.Conv2d(16, 16*width, 3, padding=1).cuda())
+        # self.highway_layers[0].downsample = False
         for _ in xrange(5):
             self.highway_layers.append(Residual(16*width, 16*width).cuda())
-        self.highway_layers.append(Residual(16*width, 32*width, stride=2).cuda())
+        self.highway_layers.append(nn.Conv2d(16*width, 32*width, stride=2, padding=1).cuda())
         for _ in xrange(5):
             self.highway_layers.append(Residual(32*width, 32*width).cuda())
-        self.highway_layers.append(Residual(32*width, 64*width, stride=2).cuda())
+        self.highway_layers.append(nn.Conv2d(32*width, 64*width, stride=2, padding=1).cuda())
         for _ in xrange(5):
             self.highway_layers.append(Residual(64*width, 64*width).cuda())
         self.final = nn.Linear(64*width, 10)
@@ -248,7 +250,7 @@ transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms
 epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
-prune_at = [150, 250]
+prune_at = [3, 150, 250]
 tc = (3e-3)/width
 
 for epoch in xrange(1, epochs + 1):
@@ -264,7 +266,7 @@ for epoch in xrange(1, epochs + 1):
         optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
     elif epoch == 80:
         optimizer = optim.SGD(network.parameters(), lr=0.005, momentum=0.9, weight_decay=5e-4, nesterov=True)
-    '''
+
     if epoch == 1:
         for l in network.highway_layers:
             l.prune(range(10), range(10, l.fan_out))
@@ -272,7 +274,7 @@ for epoch in xrange(1, epochs + 1):
         network.highway_layers[4].completely_pruned = True
         network.highway_layers[5].completely_pruned = True
         network.highway_layers[0].completely_pruned = True
-    '''
+
     if epoch in prune_at:
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
@@ -292,13 +294,15 @@ for epoch in xrange(1, epochs + 1):
         for param in network.final.parameters():
             param.requires_grad = True
         for i in reversed(range(len(network.highway_layers))):
+            if i in [0, 6, 12]:
+                continue
             ret, rem = [], []
             if i < 6:
-                max_values = max_values1[i%6]
+                max_values = max_values1[i % 6]
             elif i < 12:
-                max_values = max_values2[i%6]
+                max_values = max_values2[i % 6]
             else:
-                max_values = max_values3[i%6]
+                max_values = max_values3[i % 6]
             for j in xrange(len(max_values)):
                 if max_values[j] < 0.01:
                     rem.append(j)

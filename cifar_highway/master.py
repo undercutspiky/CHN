@@ -149,7 +149,7 @@ class Residual(nn.Module):
                 remove.insert(0, retain[iii])
             retain = retain[:self.conv.weight.size(0)]
         # New conv layer
-        conv = nn.Conv2d(self.fan_out, len(retain), 3, stride=self.stride, padding=1)
+        conv = nn.Conv2d(self.fan_in, len(retain), 3, stride=self.stride, padding=1)
         conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
         conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
@@ -296,11 +296,11 @@ for epoch in xrange(1, epochs + 1):
         for i in reversed(range(len(network.highway_layers))):
             ret, rem = [], []
             if i < 6:
-                max_values = max_values1[i%6]
+                max_values = max_values1[i % 6]
             elif i < 12:
-                max_values = max_values2[i%6]
+                max_values = max_values2[i % 6]
             else:
-                max_values = max_values3[i%6]
+                max_values = max_values3[i % 6]
             for j in xrange(len(max_values)):
                 if max_values[j] < 0.01:
                     rem.append(j)
