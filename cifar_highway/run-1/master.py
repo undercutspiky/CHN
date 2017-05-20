@@ -17,7 +17,7 @@ def unpickle(file):
 # Load CIFAR-10 data
 train_x = []
 train_y = []
-for i in xrange(1, 2):
+for i in xrange(1, 5):
     dict_ = unpickle('../../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
@@ -250,7 +250,7 @@ transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms
 epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
-prune_at = [1, 150, 250]
+prune_at = [150, 250]
 tc = (3e-3)/width
 
 for epoch in xrange(1, epochs + 1):
