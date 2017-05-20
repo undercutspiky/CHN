@@ -241,6 +241,11 @@ def validate():
 
     return 100.0 * correct / total
 
+
+def save_state(state_name):
+    torch.save(network.state_dict(), './model-' + state_name + '.pth')
+    torch.save(optimizer.state_dict(), './optimizer-' + state_name + '.pth')
+
 network = Net()
 network = network.cuda()
 criterion = nn.CrossEntropyLoss()
@@ -276,6 +281,7 @@ for epoch in xrange(1, epochs + 1):
         network.highway_layers[0].completely_pruned = True
     '''
     if epoch in prune_at:
+        save_state(str(epoch))
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
             outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
