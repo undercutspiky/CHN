@@ -313,9 +313,9 @@ for epoch in xrange(1, epochs + 1):
         for i in reversed(range(len(network.highway_layers))):
             if i in [0, 6, 12]:
                 continue
-            network.highway_layers[i].prune(ret_arr[len(network.highway_layers) - i],
-                                            rem_arr[len(network.highway_layers) - i],
-                                            ret_arr[len(network.highway_layers) - i - 1])
+            network.highway_layers[i].prune(ret_arr[len(network.highway_layers) - i - 1],
+                                            rem_arr[len(network.highway_layers) - i - 1],
+                                            ret_arr[len(network.highway_layers) - i])
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv
 
