@@ -62,6 +62,7 @@ class Residual(nn.Module):
         for ii in xrange(fan_out):
             self.reverse_order[self.order[ii]] = ii
         self.order = torch.cuda.LongTensor(self.order)
+        self.prev = None
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
         self.downsample = self.fan_in < self.fan_out
         self.mask_x = None
@@ -96,7 +97,10 @@ class Residual(nn.Module):
                 x_new = x_new * Variable(self.mask_x).cuda()
             return x_new, Variable(torch.zeros(x_new.size(0), x_new.size(1)).cuda())
         self.batch_norm.training = train_mode
-        h = self.conv(F.relu6(self.batch_norm(x)))
+        if self.prev is not None:
+            h = self.conv(F.relu6(self.batch_norm(x.permute(1, 0, 2, 3)[self.prev].permute(1, 0, 2, 3))))
+        else:
+            h = self.conv(F.relu6(self.batch_norm(x)))
         t = F.sigmoid(self.transform(h))
         x_new = x
         if self.downsample:
@@ -114,6 +118,7 @@ class Residual(nn.Module):
         # Number of feature maps in h
         maps_i = range(h.size(1))
         # Padding - to match dimensions of pruned layer and x_new
+        '''
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
         if self.mask_h is None or self.mask_h.size() != h.size():
@@ -124,10 +129,11 @@ class Residual(nn.Module):
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
         t = t * Variable(self.mask_h, requires_grad=False).cuda()
+        '''
         # This is where self.order comes in use after the layer has been pruned
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
-        out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
+        # out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
         return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
 
     def prune(self, retain=[], remove=[], retain_prev=[]):
@@ -164,11 +170,20 @@ class Residual(nn.Module):
                                          [torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data.cpu().cuda())
         conv.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = conv
+        # New batch_norm layer
+        batch_norm = nn.BatchNorm2d(len(retain), len(retain), 3, padding=1)
+        # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
+        batch_norm.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain_prev)].data)
+        batch_norm.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain_prev)].data)
+        batch_norm.running_mean = self.batch_norm.running_mean[retain_prev]
+        batch_norm.running_var = self.batch_norm.running_var[retain_prev]
+        self.batch_norm = batch_norm
         # Set self.order and reverse order
-        self.order = self.order[torch.cuda.LongTensor(retain + remove)]
+        self.order = self.order[torch.cuda.LongTensor(retain)]
         for ii in xrange(len(self.order)):
             self.reverse_order[self.order[ii]] = ii
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
+        self.prev = retain_prev
 
 
 class Net(nn.Module):
