@@ -271,7 +271,7 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch in prune_at:
         restore_state('150')
-
+        print('Accuracy on valid set after restoring model: %f %%' % (epoch, validate()))
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
             outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
