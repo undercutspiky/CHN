@@ -328,7 +328,7 @@ for epoch in xrange(1, epochs + 1):
         final = nn.Linear(len(ret_arr[0]), 10)
         final.weight = nn.Parameter(network.final.weight[torch.cuda.LongTensor(ret_arr[0])].data)
         network.final = final
-        for i in reversed(range(len(network.highway_layers))):
+        for i in reversed(range(1, len(network.highway_layers))):
             if i in [0, 6, 12]:
                 continue
             network.highway_layers[i].prune(ret_arr[len(network.highway_layers) - i - 1],
