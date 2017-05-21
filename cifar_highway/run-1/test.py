@@ -183,7 +183,7 @@ class Residual(nn.Module):
         for ii in xrange(len(self.order)):
             self.reverse_order[self.order[ii]] = ii
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
-        self.prev = retain_prev
+        self.prev = torch.cuda.LongTensor(retain_prev)
 
 
 class Net(nn.Module):
