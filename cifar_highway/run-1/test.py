@@ -171,7 +171,7 @@ class Residual(nn.Module):
         conv.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = conv
         # New batch_norm layer
-        batch_norm = nn.BatchNorm2d(len(retain), len(retain), 3, padding=1)
+        batch_norm = nn.BatchNorm2d(len(retain_prev))
         # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
         batch_norm.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain_prev)].data)
         batch_norm.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain_prev)].data)
