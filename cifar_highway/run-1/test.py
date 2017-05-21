@@ -149,8 +149,12 @@ class Residual(nn.Module):
                 remove.insert(0, retain[iii])
             retain = retain[:self.conv.weight.size(0)]
         # New conv layer
-        conv = nn.Conv2d(self.fan_in, len(retain), 3, stride=self.stride, padding=1)
-        conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
+        # conv = nn.Conv2d(self.fan_in, len(retain), 3, stride=self.stride, padding=1)
+        # conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
+        conv = nn.Conv2d(len(retain_prev), len(retain), 3, padding=1)
+        # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
+        conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
+                                         [torch.cuda.LongTensor(retain_prev)].permute(1, 0, 2, 3).data.cpu().cuda())
         conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
         # New transform layer
@@ -271,7 +275,6 @@ for epoch in xrange(1, epochs + 1):
 
     if epoch in prune_at:
         restore_state('150')
-        print('Accuracy on valid set after restoring model: %f %%' % (validate()))
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
             outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
@@ -290,9 +293,8 @@ for epoch in xrange(1, epochs + 1):
             param.requires_grad = False
         for param in network.final.parameters():
             param.requires_grad = True
+        ret_arr, rem_arr = [], []
         for i in reversed(range(len(network.highway_layers))):
-            if i in [0, 6, 12]:
-                continue
 
             ret, rem = [], []
             if i < 6:
@@ -306,11 +308,17 @@ for epoch in xrange(1, epochs + 1):
                     rem.append(j)
                 else:
                     ret.append(j)
-            network.highway_layers[i].prune(ret, rem)
+            ret_arr.append(ret)
+            rem_arr.append(rem)
+        for i in reversed(range(len(network.highway_layers))):
+            if i in [0, 6, 12]:
+                continue
+            network.highway_layers[i].prune(ret_arr[len(network.highway_layers) - i - 1],
+                                            rem_arr[len(network.highway_layers) - i - 1],
+                                            ret_arr[len(network.highway_layers) - i])
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv
 
-            network.highway_layers[i].completely_pruned = True
             print('Accuracy on valid set after completely pruning layer %d: %f %%' % (i, validate()))
 
             for param in network.highway_layers[i].parameters():
