@@ -155,8 +155,8 @@ class Residual(nn.Module):
         # conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
         conv = nn.Conv2d(len(retain_prev), len(retain), 3, padding=1)
         # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
-        conv.weight = nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
-                                   [torch.cuda.LongTensor(retain_prev)].permute(1, 0, 2, 3).data.cpu().cuda())
+        conv.weight = nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
+        conv.weight = nn.Parameter(conv.weight.permute(1, 0, 2, 3)[torch.cuda.LongTensor(retain_prev)].permute(1, 0, 2, 3).data.cpu().cuda())
         conv.bias = nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
         # New transform layer
