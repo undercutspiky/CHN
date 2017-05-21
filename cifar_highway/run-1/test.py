@@ -249,6 +249,7 @@ def save_state(state_name):
 
 def restore_state(state_name):
     network.load_state_dict(torch.load('./model-' + state_name + '.pth'))
+    optimizer.load_state_dict(torch.load('./optimizer-' + state_name + '.pth'))
 
 network = Net()
 network = network.cuda()
