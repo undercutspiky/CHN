@@ -220,7 +220,7 @@ def train():
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
+        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + tc * t_cost
         loss.backward()
         nn.utils.clip_grad_norm(network.parameters(), 1.0)
         optimizer.step()
@@ -261,6 +261,7 @@ epochs = 20
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 prune_at = [1]
+tc = 3e-3/width
 
 for epoch in xrange(1, epochs + 1):
 
@@ -301,7 +302,7 @@ for epoch in xrange(1, epochs + 1):
             else:
                 max_values = max_values3[i % 6]
             for j in xrange(len(max_values)):
-                if max_values[j] < 0.02:
+                if max_values[j] < 0.01:
                     rem.append(j)
                 else:
                     ret.append(j)
