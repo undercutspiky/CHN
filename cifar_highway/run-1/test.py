@@ -118,7 +118,7 @@ class Residual(nn.Module):
         # Number of feature maps in h
         maps_i = range(h.size(1))
         # Padding - to match dimensions of pruned layer and x_new
-        '''
+        
         h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
         if self.mask_h is None or self.mask_h.size() != h.size():
@@ -129,9 +129,11 @@ class Residual(nn.Module):
         t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
         # To ameliorate mode='replicate'
         t = t * Variable(self.mask_h, requires_grad=False).cuda()
-        '''
+        
         # This is where self.order comes in use after the layer has been pruned
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
+        #if self.pruned:
+        #    print (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3)).size(), t.size()
         out += (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
         # out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
         return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
@@ -175,7 +177,7 @@ class Residual(nn.Module):
         batch_norm.running_var = self.batch_norm.running_var[torch.cuda.LongTensor(retain_prev)]
         self.batch_norm = batch_norm
         # Set self.order and reverse order
-        self.order = self.order[torch.cuda.LongTensor(retain)]
+        self.order = self.order[torch.cuda.LongTensor(retain + remove)]
         for ii in xrange(len(self.order)):
             self.reverse_order[self.order[ii]] = ii
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
@@ -321,10 +323,10 @@ for epoch in xrange(1, epochs + 1):
                     ret.append(j)
             ret_arr.append(ret)
             rem_arr.append(rem)
-        final = nn.Linear(len(ret_arr[0]), 10)
-        final.weight = nn.Parameter(network.final.weight.permute(1, 0, 2, 3)[torch.cuda.LongTensor(ret_arr[0])].
-                                    permute(1, 0, 2, 3).data.cpu().gpu())
-        network.final = final
+        #final = nn.Linear(len(ret_arr[0]), 10)
+        #final.weight = nn.Parameter(network.final.weight.t()[torch.cuda.LongTensor(ret_arr[0])].t().data)
+        #final.bias = network.final.bias
+        #network.final = final.cuda()
         for i in reversed(range(1, len(network.highway_layers))):
             if i in [0, 6, 12]:
                 continue
