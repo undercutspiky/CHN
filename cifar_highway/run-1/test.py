@@ -74,7 +74,7 @@ class Residual(nn.Module):
         w_initialization(self.transform.weight)
         nn.init.constant(self.transform.bias, -2.0)
 
-    def forward(self, x, train_mode=True):
+    def forward(self, x, train_mode=True, last=False):
         """
         Using mode='replicate' while padding cuz constant is not yet implemented for 5-D input
         :param x: input
@@ -118,17 +118,17 @@ class Residual(nn.Module):
         # Number of feature maps in h
         maps_i = range(h.size(1))
         # Padding - to match dimensions of pruned layer and x_new
-        
-        h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
-        # To ameliorate mode='replicate'
-        if self.mask_h is None or self.mask_h.size() != h.size():
-            self.mask_h = torch.zeros(h.size())
-            maps_i_size = self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
-            self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
-        h = h * Variable(self.mask_h, requires_grad=False).cuda()
-        t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
-        # To ameliorate mode='replicate'
-        t = t * Variable(self.mask_h, requires_grad=False).cuda()
+        if not last:
+            h = torch.squeeze(F.pad(h.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - h.size(1)), mode='replicate'))
+            # To ameliorate mode='replicate'
+            if self.mask_h is None or self.mask_h.size() != h.size():
+                self.mask_h = torch.zeros(h.size())
+                maps_i_size = self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)].size()
+                self.mask_h.permute(1, 0, 2, 3)[torch.LongTensor(maps_i)] = torch.ones(maps_i_size)
+            h = h * Variable(self.mask_h, requires_grad=False).cuda()
+            t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
+            # To ameliorate mode='replicate'
+            t = t * Variable(self.mask_h, requires_grad=False).cuda()
         
         # This is where self.order comes in use after the layer has been pruned
         out = h * t #+ (x_new.permute(1, 0, 2, 3)[self.order].permute(1, 0, 2, 3) * (1 - t))
@@ -138,7 +138,7 @@ class Residual(nn.Module):
         # out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
         return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
 
-    def prune(self, retain=[], remove=[], retain_prev=[]):
+    def prune(self, retain=[], remove=[], retain_prev=[], last=False):
         """
         Create new layers and copy the parameters of the selected nodes.
         :param retain: list of nodes to retain
@@ -177,7 +177,9 @@ class Residual(nn.Module):
         batch_norm.running_var = self.batch_norm.running_var[torch.cuda.LongTensor(retain_prev)]
         self.batch_norm = batch_norm
         # Set self.order and reverse order
-        self.order = self.order[torch.cuda.LongTensor(retain + remove)]
+        if not last:
+            retain = retain + remove
+        self.order = self.order[torch.cuda.LongTensor(retain)]
         for ii in xrange(len(self.order)):
             self.reverse_order[self.order[ii]] = ii
         self.reverse_order = torch.cuda.LongTensor(self.reverse_order)
@@ -205,7 +207,7 @@ class Net(nn.Module):
         net = self.conv1(x)
         t_sum, temp1, temp2, temp3 = 0, None, None, None
         for iii in xrange(len(self.highway_layers)):
-            net, t = self.highway_layers[iii](net, train_mode=train_mode)
+            net, t = self.highway_layers[iii](net, train_mode=train_mode, last=(iii == len(self.highway_layers) - 1))
             t_sum += torch.sum(t, dim=1)
             if get_t:
                 if iii < 6:
@@ -323,16 +325,17 @@ for epoch in xrange(1, epochs + 1):
                     ret.append(j)
             ret_arr.append(ret)
             rem_arr.append(rem)
-        #final = nn.Linear(len(ret_arr[0]), 10)
-        #final.weight = nn.Parameter(network.final.weight.t()[torch.cuda.LongTensor(ret_arr[0])].t().data)
-        #final.bias = network.final.bias
-        #network.final = final.cuda()
+        final = nn.Linear(len(ret_arr[0]), 10)
+        final.weight = nn.Parameter(network.final.weight.t()[torch.cuda.LongTensor(ret_arr[0])].t().data)
+        final.bias = network.final.bias
+        network.final = final.cuda()
         for i in reversed(range(1, len(network.highway_layers))):
             if i in [0, 6, 12]:
                 continue
             network.highway_layers[i].prune(ret_arr[len(network.highway_layers) - i - 1],
                                             rem_arr[len(network.highway_layers) - i - 1],
-                                            ret_arr[len(network.highway_layers) - i])
+                                            ret_arr[len(network.highway_layers) - i],
+                                            i == (len(network.highway_layers) - 1))
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv
 
