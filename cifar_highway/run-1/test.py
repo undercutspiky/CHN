@@ -159,22 +159,22 @@ class Residual(nn.Module):
         # conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
         conv = nn.Conv2d(len(retain_prev), len(retain), 3, padding=1)
         # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
-        conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
-                                         [torch.cuda.LongTensor(retain_prev)].permute(1, 0, 2, 3).data.cpu().cuda())
-        conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
+        conv.weight = nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
+                                   [torch.cuda.LongTensor(retain_prev)].permute(1, 0, 2, 3).data.cpu().cuda())
+        conv.bias = nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
         # New transform layer
         conv = nn.Conv2d(len(retain), len(retain), 3, padding=1)
         # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
-        conv.weight = torch.nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
-                                         [torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data.cpu().cuda())
-        conv.bias = torch.nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
+        conv.weight = nn.Parameter(self.transform.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
+                                   [torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data.cpu().cuda())
+        conv.bias = nn.Parameter(self.transform.bias[torch.cuda.LongTensor(retain)].data)
         self.transform = conv
         # New batch_norm layer
         batch_norm = nn.BatchNorm2d(len(retain_prev))
         # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
-        batch_norm.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain_prev)].data)
-        batch_norm.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain_prev)].data)
+        batch_norm.weight = nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain_prev)].data)
+        batch_norm.bias = nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain_prev)].data)
         batch_norm.running_mean = self.batch_norm.running_mean[torch.cuda.LongTensor(retain_prev)]
         batch_norm.running_var = self.batch_norm.running_var[torch.cuda.LongTensor(retain_prev)]
         self.batch_norm = batch_norm
@@ -325,6 +325,10 @@ for epoch in xrange(1, epochs + 1):
                     ret.append(j)
             ret_arr.append(ret)
             rem_arr.append(rem)
+        final = nn.Linear(len(ret_arr[0]), 10)
+        final.weight = nn.Parameter(network.final.weight[torch.cuda.LongTensor(ret_arr[0])].data)
+        final.bias = nn.Parameter(network.final.bias[torch.cuda.LongTensor(ret_arr[0])].data)
+        network.final = final
         for i in reversed(range(len(network.highway_layers))):
             if i in [0, 6, 12]:
                 continue
