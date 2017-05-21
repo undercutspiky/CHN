@@ -293,8 +293,10 @@ for epoch in xrange(1, epochs + 1):
             param.requires_grad = False
         for param in network.final.parameters():
             param.requires_grad = True
-        rem_arr, ret_arr = [], []
         for i in reversed(range(len(network.highway_layers))):
+            if i in [0, 6, 12]:
+                continue
+
             ret, rem = [], []
             if i < 6:
                 max_values = max_values1[i % 6]
@@ -303,19 +305,11 @@ for epoch in xrange(1, epochs + 1):
             else:
                 max_values = max_values3[i % 6]
             for j in xrange(len(max_values)):
-                if max_values[j] < 0.01:
+                if max_values[j] < 0.02:
                     rem.append(j)
                 else:
                     ret.append(j)
-            rem_arr.append(rem)
-            ret_arr.append(ret)
-
-        for i in reversed(range(len(network.highway_layers))):
-            if i in [0, 6, 12]:
-                continue
-            network.highway_layers[i].prune(ret_arr[len(network.highway_layers) - i - 1],
-                                            rem_arr[len(network.highway_layers) - i - 1],
-                                            ret_arr[len(network.highway_layers) - i])
+            network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv
 
