@@ -175,8 +175,8 @@ class Residual(nn.Module):
         # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
         batch_norm.weight = torch.nn.Parameter(self.batch_norm.weight[torch.cuda.LongTensor(retain_prev)].data)
         batch_norm.bias = torch.nn.Parameter(self.batch_norm.bias[torch.cuda.LongTensor(retain_prev)].data)
-        batch_norm.running_mean = self.batch_norm.running_mean[retain_prev]
-        batch_norm.running_var = self.batch_norm.running_var[retain_prev]
+        batch_norm.running_mean = self.batch_norm.running_mean[torch.cuda.LongTensor(retain_prev)]
+        batch_norm.running_var = self.batch_norm.running_var[torch.cuda.LongTensor(retain_prev)]
         self.batch_norm = batch_norm
         # Set self.order and reverse order
         self.order = self.order[torch.cuda.LongTensor(retain)]
