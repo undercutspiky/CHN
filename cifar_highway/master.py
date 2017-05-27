@@ -144,10 +144,6 @@ class Residual(nn.Module):
             self.completely_pruned = True
             print 'Completely Pruned !'
             return
-        if len(retain) > self.conv.weight.size(0):
-            for iii in xrange(self.conv.weight.size(0), len(retain)):
-                remove.insert(0, retain[iii])
-            retain = retain[:self.conv.weight.size(0)]
         # New conv layer
         conv = nn.Conv2d(self.fan_in, len(retain), 3, stride=self.stride, padding=1)
         conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)

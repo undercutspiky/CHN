@@ -130,7 +130,7 @@ class Residual(nn.Module):
         out = out.permute(1, 0, 2, 3)[self.reverse_order].permute(1, 0, 2, 3)
         return out, torch.squeeze(torch.max(torch.max(t, dim=2)[0], dim=3)[0])
 
-    def prune(self, retain=[], remove=[], retain_prev=[]):
+    def prune(self, retain=[], remove=[]):
         """
         Create new layers and copy the parameters of the selected nodes.
         :param retain: list of nodes to retain
@@ -145,12 +145,8 @@ class Residual(nn.Module):
             print 'Completely Pruned !'
             return
         # New conv layer
-        # conv = nn.Conv2d(self.fan_in, len(retain), 3, stride=self.stride, padding=1)
-        # conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
-        conv = nn.Conv2d(len(retain), len(retain), 3, padding=1)
-        # Transfer weights to cpu then to cuda to avoid RuntimeError: cuDNN requires contiguous weight tensor
-        conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3)
-                                         [torch.cuda.LongTensor(retain)].permute(1, 0, 2, 3).data.cpu().cuda())
+        conv = nn.Conv2d(self.fan_in, len(retain), 3, stride=self.stride, padding=1)
+        conv.weight = torch.nn.Parameter(self.conv.weight[torch.cuda.LongTensor(retain)].data)
         conv.bias = torch.nn.Parameter(self.conv.bias[torch.cuda.LongTensor(retain)].data)
         self.conv = conv
         # New transform layer
@@ -220,7 +216,7 @@ def train():
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + tc * t_cost
+        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
         loss.backward()
         nn.utils.clip_grad_norm(network.parameters(), 1.0)
         optimizer.step()
@@ -244,7 +240,6 @@ def validate():
 
 def save_state(state_name):
     torch.save(network.state_dict(), './model-' + state_name + '.pth')
-    torch.save(optimizer.state_dict(), './optimizer-' + state_name + '.pth')
 
 
 def restore_state(state_name):
@@ -289,9 +284,9 @@ for epoch in xrange(1, epochs + 1):
             param.requires_grad = False
         for param in network.final.parameters():
             param.requires_grad = True
-        ret_arr, rem_arr = [], []
         for i in reversed(range(len(network.highway_layers))):
-
+            if i in [0, 6, 12]:
+                continue
             ret, rem = [], []
             if i < 6:
                 max_values = max_values1[i % 6]
@@ -300,40 +295,33 @@ for epoch in xrange(1, epochs + 1):
             else:
                 max_values = max_values3[i % 6]
             for j in xrange(len(max_values)):
-                if max_values[j] < 0.01:
+                if max_values[j] < 0.005:
                     rem.append(j)
                 else:
                     ret.append(j)
-            ret_arr.append(ret)
-            rem_arr.append(rem)
-        for i in reversed(range(len(network.highway_layers))):
-            if i in [0, 6, 12]:
-                continue
-            network.highway_layers[i].prune(ret_arr[len(network.highway_layers) - i - 1],
-                                            rem_arr[len(network.highway_layers) - i - 1],
-                                            ret_arr[len(network.highway_layers) - i])
+            network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv
 
-            print('Accuracy on valid set after completely pruning layer %d: %f %%' % (i, validate()))
+            print('Accuracy on valid set after pruning layer %d: %f %%' % (i, validate()))
 
             for param in network.highway_layers[i].parameters():
                 param.requires_grad = True
             if i > 12:
                 train()
-                print('Accuracy after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
+                print('Accuracy after pruning and training for 1 epoch layer %d onwards: %f %%' % (i, validate()))
             elif i > 6:
                 train()
-                print('Accuracy after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
+                print('Accuracy after pruning and training for 1 epoch layer %d onwards: %f %%' % (i, validate()))
                 train()
-                print('Accuracy after pruning and training for 2 epochs %d layer onwards: %f %%' % (i, validate()))
+                print('Accuracy after pruning and training for 2 epochs layer %d onwards: %f %%' % (i, validate()))
             else:
                 train()
-                print('Accuracy after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
+                print('Accuracy after pruning and training for 1 epoch layer %d onwards: %f %%' % (i, validate()))
                 train()
-                print('Accuracy after pruning and training for 2 epochs %d layer onwards: %f %%' % (i, validate()))
+                print('Accuracy after pruning and training for 2 epochs layer %d onwards: %f %%' % (i, validate()))
                 train()
-                print('Accuracy after pruning and training for 3 epochs %d layer onwards: %f %%' % (i, validate()))
+                print('Accuracy after pruning and training for 3 epochs layer %d onwards: %f %%' % (i, validate()))
         for param in network.parameters():
             param.requires_grad = True
 
@@ -342,3 +330,4 @@ for epoch in xrange(1, epochs + 1):
     cursor, correct, total = 0, 0, 0
 
     print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, validate()))
+save_state('pruned')
