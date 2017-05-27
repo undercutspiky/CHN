@@ -411,4 +411,156 @@ For epoch 18 	Accuracy on valid set: 87.150000 %
 For epoch 19 	Accuracy on valid set: 87.060000 %
 182.0 185.0
 For epoch 20 	Accuracy on valid set: 87.110000 %
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-1$ python test.py 
+Number of training examples : 40000
+Conv2d(256, 21, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 17: 84.140000 %
+45.0 46.0
+Accuracy after pruning and training for 1 epoch layer 17 onwards: 85.540000 %
+Conv2d(256, 44, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 16: 47.230000 %
+63.0 64.0
+Accuracy after pruning and training for 1 epoch layer 16 onwards: 85.330000 %
+Conv2d(256, 47, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 15: 14.900000 %
+77.0 78.0
+Accuracy after pruning and training for 1 epoch layer 15 onwards: 85.980000 %
+Conv2d(256, 45, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 14: 10.740000 %
+96.0 97.0
+Accuracy after pruning and training for 1 epoch layer 14 onwards: 85.550000 %
+Conv2d(256, 120, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 13: 10.120000 %
+133.0 135.0
+Accuracy after pruning and training for 1 epoch layer 13 onwards: 81.220000 %
+Conv2d(128, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 11: 17.340000 %
+133.0 135.0
+Accuracy after pruning and training for 1 epoch layer 11 onwards: 81.040000 %
+133.0 135.0
+Accuracy after pruning and training for 2 epochs layer 11 onwards: 81.680000 %
+Conv2d(128, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 10: 9.200000 %
+134.0 136.0
+Accuracy after pruning and training for 1 epoch layer 10 onwards: 81.830000 %
+134.0 136.0
+Accuracy after pruning and training for 2 epochs layer 10 onwards: 82.340000 %
+Conv2d(128, 29, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 9: 10.140000 %
+145.0 147.0
+Accuracy after pruning and training for 1 epoch layer 9 onwards: 80.100000 %
+145.0 147.0
+Accuracy after pruning and training for 2 epochs layer 9 onwards: 80.570000 %
+Conv2d(128, 21, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 8: 9.520000 %
+152.0 154.0
+Accuracy after pruning and training for 1 epoch layer 8 onwards: 78.470000 %
+152.0 154.0
+Accuracy after pruning and training for 2 epochs layer 8 onwards: 79.070000 %
+Conv2d(128, 102, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 7: 10.220000 %
+161.0 162.0
+Accuracy after pruning and training for 1 epoch layer 7 onwards: 74.860000 %
+160.0 162.0
+Accuracy after pruning and training for 2 epochs layer 7 onwards: 76.710000 %
+Conv2d(64, 13, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 5: 10.220000 %
+166.0 168.0
+Accuracy after pruning and training for 1 epoch layer 5 onwards: 76.250000 %
+166.0 168.0
+Accuracy after pruning and training for 2 epochs layer 5 onwards: 77.220000 %
+166.0 168.0
+Accuracy after pruning and training for 3 epochs layer 5 onwards: 78.010000 %
+Conv2d(64, 17, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 4: 10.220000 %
+173.0 175.0
+Accuracy after pruning and training for 1 epoch layer 4 onwards: 71.630000 %
+173.0 175.0
+Accuracy after pruning and training for 2 epochs layer 4 onwards: 73.490000 %
+173.0 175.0
+Accuracy after pruning and training for 3 epochs layer 4 onwards: 74.810000 %
+Conv2d(64, 49, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 3: 10.450000 %
+181.0 184.0
+Accuracy after pruning and training for 1 epoch layer 3 onwards: 73.360000 %
+181.0 184.0
+Accuracy after pruning and training for 2 epochs layer 3 onwards: 75.100000 %
+181.0 183.0
+Accuracy after pruning and training for 3 epochs layer 3 onwards: 76.320000 %
+Conv2d(64, 52, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 2: 10.200000 %
+182.0 185.0
+Accuracy after pruning and training for 1 epoch layer 2 onwards: 77.730000 %
+182.0 185.0
+Accuracy after pruning and training for 2 epochs layer 2 onwards: 78.260000 %
+182.0 185.0
+Accuracy after pruning and training for 3 epochs layer 2 onwards: 78.820000 %
+Conv2d(64, 56, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 1: 10.220000 %
+188.0 190.0
+Accuracy after pruning and training for 1 epoch layer 1 onwards: 79.600000 %
+188.0 190.0
+Accuracy after pruning and training for 2 epochs layer 1 onwards: 80.020000 %
+188.0 190.0
+Accuracy after pruning and training for 3 epochs layer 1 onwards: 80.320000 %
+188.0 191.0
+For epoch 1 	Accuracy on valid set: 82.590000 %
+189.0 191.0
+For epoch 2 	Accuracy on valid set: 83.180000 %
+189.0 193.0
+For epoch 3 	Accuracy on valid set: 84.030000 %
+190.0 192.0
+For epoch 4 	Accuracy on valid set: 84.480000 %
+190.0 193.0
+For epoch 5 	Accuracy on valid set: 84.430000 %
+191.0 194.0
+For epoch 6 	Accuracy on valid set: 84.880000 %
+191.0 195.0
+For epoch 7 	Accuracy on valid set: 85.170000 %
+192.0 195.0
+For epoch 8 	Accuracy on valid set: 85.540000 %
+192.0 196.0
+For epoch 9 	Accuracy on valid set: 85.510000 %
+193.0 196.0
+For epoch 10 	Accuracy on valid set: 85.540000 %
+193.0 196.0
+For epoch 11 	Accuracy on valid set: 85.820000 %
+193.0 197.0
+For epoch 12 	Accuracy on valid set: 85.900000 %
+194.0 197.0
+For epoch 13 	Accuracy on valid set: 85.960000 %
+194.0 197.0
+For epoch 14 	Accuracy on valid set: 86.090000 %
+194.0 198.0
+For epoch 15 	Accuracy on valid set: 86.230000 %
+195.0 198.0
+For epoch 16 	Accuracy on valid set: 86.190000 %
+195.0 199.0
+For epoch 17 	Accuracy on valid set: 86.160000 %
+195.0 199.0
+For epoch 18 	Accuracy on valid set: 86.230000 %
+196.0 199.0
+For epoch 19 	Accuracy on valid set: 86.420000 %
+196.0 200.0
+For epoch 20 	Accuracy on valid set: 86.470000 %
+196.0 200.0
+For epoch 21 	Accuracy on valid set: 86.470000 %
+197.0 200.0
+For epoch 22 	Accuracy on valid set: 86.490000 %
+197.0 200.0
+For epoch 23 	Accuracy on valid set: 86.590000 %
+197.0 201.0
+For epoch 24 	Accuracy on valid set: 86.620000 %
+198.0 201.0
+For epoch 25 	Accuracy on valid set: 86.500000 %
+198.0 201.0
+For epoch 26 	Accuracy on valid set: 86.550000 %
+198.0 201.0
+For epoch 27 	Accuracy on valid set: 86.680000 %
+198.0 202.0
+For epoch 28 	Accuracy on valid set: 86.730000 %
+199.0 202.0
+For epoch 29 	Accuracy on valid set: 86.800000 %
+199.0 202.0
+For epoch 30 	Accuracy on valid set: 86.840000 %
 (tf)dhananjay@o990:~/CHN/cifar_highway/run-1$ 
