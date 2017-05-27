@@ -49,7 +49,10 @@ class Residual(nn.Module):
     def __init__(self, fan_in, fan_out, stride=1, filter_size=3, w_init='xavier_normal'):
         super(Residual, self).__init__()
         self.fan_in, self.fan_out, self.stride = fan_in, fan_out, stride
-        self.conv = nn.Conv2d(fan_in, fan_out, filter_size, stride=stride, padding=1)
+        if filter_size == 1:
+            self.conv = nn.Conv2d(fan_in, fan_out, filter_size, stride=stride, padding=0)
+        else:
+            self.conv = nn.Conv2d(fan_in, fan_out, filter_size, stride=stride, padding=1)
         self.transform = nn.Conv2d(fan_out, fan_out, 3, padding=1)
         # self.expand_x = nn.Conv2d(fan_in, fan_out, 1)
         self.batch_norm = nn.BatchNorm2d(fan_in)
