@@ -49,7 +49,10 @@ class Residual(nn.Module):
     def __init__(self, fan_in, fan_out, stride=1, filter_size=3, w_init='xavier_normal'):
         super(Residual, self).__init__()
         self.fan_in, self.fan_out, self.stride = fan_in, fan_out, stride
-        self.conv = nn.Conv2d(fan_in, fan_out, filter_size, stride=stride, padding=1)
+        if filter_size == 1:
+            self.conv = nn.Conv2d(fan_in, fan_out, filter_size, stride=stride, padding=0)
+        else:
+            self.conv = nn.Conv2d(fan_in, fan_out, filter_size, stride=stride, padding=1)
         self.transform = nn.Conv2d(fan_out, fan_out, 3, padding=1)
         # self.expand_x = nn.Conv2d(fan_in, fan_out, 1)
         self.batch_norm = nn.BatchNorm2d(fan_in)
@@ -208,7 +211,6 @@ class Net(nn.Module):
 
         net = F.avg_pool2d(net, 8, 1)
         net = torch.squeeze(net)
-        net = self.final(net)
         if get_t:
             return net, [temp1, temp2]
         if train_mode:
@@ -275,7 +277,7 @@ epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 prune_at = [150, 250]
-tc = (3e-3)/width
+tc = 3e-3
 
 for epoch in xrange(1, epochs + 1):
 
