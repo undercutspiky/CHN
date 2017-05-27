@@ -211,7 +211,6 @@ class Net(nn.Module):
 
         net = F.avg_pool2d(net, 8, 1)
         net = torch.squeeze(net)
-        net = self.final(net)
         if get_t:
             return net, [temp1, temp2]
         if train_mode:
