@@ -210,13 +210,13 @@ class Net(nn.Module):
         return temp
 
 
-def train():
+def train(tco=0.0):
     cursor, t_cost_arr = 0, []
     while cursor + batch_size <= len(train_x):  # So that masks are created only once -ignore last batch of smaller size
         optimizer.zero_grad()
         outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
         t_cost_arr.append(t_cost.data[0][0])
-        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))]))
+        loss = criterion(outputs, Variable(train_y[cursor:min(cursor + batch_size, len(train_x))])) + tco * t_cost
         loss.backward()
         nn.utils.clip_grad_norm(network.parameters(), 1.0)
         optimizer.step()
@@ -240,6 +240,7 @@ def validate():
 
 def save_state(state_name):
     torch.save(network.state_dict(), './model-' + state_name + '.pth')
+    torch.save(optimizer.state_dict(), './optimizer-' + state_name + '.pth')
 
 
 def restore_state(state_name):
@@ -258,6 +259,13 @@ print "Number of training examples : "+str(train_x.size(0))
 prune_at = [1]
 tc = 3e-3/width
 
+restore_state('150')
+for epoch in xrange(50):
+    train(tc)
+    print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, validate()))
+
+save_state('200')
+
 for epoch in xrange(1, epochs + 1):
 
     sequence = torch.randperm(len(train_x)).cuda()
@@ -265,7 +273,6 @@ for epoch in xrange(1, epochs + 1):
     train_y = train_y[sequence]
 
     if epoch in prune_at:
-        restore_state('150')
         cursor, t_values1, t_values2, t_values3 = 0, 0, 0, 0
         while cursor < len(valid_x):
             outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
@@ -295,7 +302,7 @@ for epoch in xrange(1, epochs + 1):
             else:
                 max_values = max_values3[i % 6]
             for j in xrange(len(max_values)):
-                if max_values[j] < 0.005:
+                if max_values[j] < 0.007:
                     rem.append(j)
                 else:
                     ret.append(j)
