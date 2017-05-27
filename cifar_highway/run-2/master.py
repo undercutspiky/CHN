@@ -275,7 +275,7 @@ epochs = 300
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 prune_at = [150, 250]
-tc = (3e-3)/width
+tc = 3e-3
 
 for epoch in xrange(1, epochs + 1):
 
