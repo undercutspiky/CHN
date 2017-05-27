@@ -253,18 +253,13 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
-epochs = 20
+epochs = 30
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 prune_at = [1]
 tc = 3e-3/width
 
-restore_state('150')
-for epoch in xrange(50):
-    train(tc)
-    print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, validate()))
-
-save_state('200')
+restore_state('200')
 
 for epoch in xrange(1, epochs + 1):
 
@@ -302,7 +297,7 @@ for epoch in xrange(1, epochs + 1):
             else:
                 max_values = max_values3[i % 6]
             for j in xrange(len(max_values)):
-                if max_values[j] < 0.007:
+                if max_values[j] < 0.015:
                     rem.append(j)
                 else:
                     ret.append(j)
@@ -337,4 +332,4 @@ for epoch in xrange(1, epochs + 1):
     cursor, correct, total = 0, 0, 0
 
     print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, validate()))
-save_state('pruned')
+save_state('pruned2')
