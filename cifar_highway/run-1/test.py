@@ -18,7 +18,7 @@ def unpickle(file):
 train_x = []
 train_y = []
 for i in xrange(1, 5):
-    dict_ = unpickle('../data/CIFAR-10/data_batch_' + str(i))
+    dict_ = unpickle('../../data/CIFAR-10/data_batch_' + str(i))
     if i == 1:
         train_x = np.array(dict_['data'])/255.0
         train_y = dict_['labels']
@@ -27,7 +27,7 @@ for i in xrange(1, 5):
         train_y.extend(dict_['labels'])
 
 train_y = np.array(train_y)
-dict_ = unpickle('../data/CIFAR-10/data_batch_5')
+dict_ = unpickle('../../data/CIFAR-10/data_batch_5')
 valid_x = np.array(dict_['data'])/255.0
 valid_y = np.array(dict_['labels'])
 del dict_

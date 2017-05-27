@@ -1,0 +1,725 @@
+^CTraceback (most recent call last):
+  File "master.py", line 324, in <module>
+    train()
+  File "master.py", line 225, in train
+    nn.utils.clip_grad_norm(network.parameters(), 1.0)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/utils/clip_grad.py", line 25, in clip_grad_norm
+    param_norm = p.grad.data.norm(norm_type)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ rm screenlog.0
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Accuracy on valid set after completely pruning layer 17: 62.030000 %
+39.0 40.0
+Accuracy after pruning and training for 1 epoch 17 layer onwards: 80.460000 %
+Accuracy on valid set after completely pruning layer 16: 9.520000 %
+30.0 31.0
+Accuracy after pruning and training for 1 epoch 16 layer onwards: 9.480000 %
+Accuracy on valid set after completely pruning layer 15: 14.240000 %
+27.0 28.0
+Accuracy after pruning and training for 1 epoch 15 layer onwards: 12.790000 %
+Accuracy on valid set after completely pruning layer 14: 10.730000 %
+^CTraceback (most recent call last):
+  File "test.py", line 317, in <module>
+    if i > 12:
+  File "test.py", line 221, in train
+    outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 191, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 123, in forward
+    h = h * Variable(self.mask_h, requires_grad=False).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py [1Prm screenlog.0python test.py 
+Number of training examples : 40000
+Accuracy on valid set after completely pruning layer 17: 62.030000 %
+39.0 40.0
+Accuracy after pruning and training for 1 epoch 17 layer onwards: 79.190000 %
+Accuracy on valid set after completely pruning layer 16: 11.800000 %
+31.0 31.0
+Accuracy after pruning and training for 1 epoch 16 layer onwards: 14.390000 %
+Accuracy on valid set after completely pruning layer 15: 15.520000 %
+27.0 28.0
+Accuracy after pruning and training for 1 epoch 15 layer onwards: 9.670000 %
+Accuracy on valid set after completely pruning layer 14: 9.860000 %
+^CTraceback (most recent call last):
+  File "test.py", line 318, in <module>
+    
+  File "test.py", line 221, in train
+    def train():
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 191, in forward
+    def forward(self, x, train_mode=True, get_t=False):
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 126, in forward
+    t = t * Variable(self.mask_h, requires_grad=False).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Conv2d(10, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 17: 62.150000 %
+39.0 40.0
+Accuracy after pruning and training for 1 epoch 17 layer onwards: 79.490000 %
+Conv2d(33, 33, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 16: 11.870000 %
+31.0 31.0
+Accuracy after pruning and training for 1 epoch 16 layer onwards: 15.180000 %
+Conv2d(70, 70, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 15: 16.680000 %
+27.0 28.0
+Accuracy after pruning and training for 1 epoch 15 layer onwards: 9.800000 %
+Conv2d(52, 52, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 14: 9.950000 %
+24.0 25.0
+Accuracy after pruning and training for 1 epoch 14 layer onwards: 9.570000 %
+Conv2d(147, 147, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 13: 9.520000 %
+20.0 20.0
+Accuracy after pruning and training for 1 epoch 13 layer onwards: 9.520000 %
+Conv2d(21, 21, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 11: 9.520000 %
+19.0 20.0
+Accuracy after pruning and training for 1 epoch 11 layer onwards: 9.520000 %
+19.0 20.0
+Accuracy after pruning and training for 2 epochs 11 layer onwards: 9.490000 %
+Conv2d(11, 11, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 10: 9.490000 %
+18.0 19.0
+Accuracy after pruning and training for 1 epoch 10 layer onwards: 9.480000 %
+^CTraceback (most recent call last):
+  File "test.py", line 327, in <module>
+    print('Accuracy after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
+  File "test.py", line 225, in train
+    nn.utils.clip_grad_norm(network.parameters(), 1.0)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 195, in forward
+    temp1 = self.get_t_arr(temp1, t)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 126, in forward
+    t = t * Variable(self.mask_h, requires_grad=False).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Conv2d(256, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 17: 62.150000 %
+39.0 40.0
+Accuracy after pruning and training for 1 epoch 17 layer onwards: 79.310000 %
+Conv2d(256, 33, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 16: 12.360000 %
+31.0 31.0
+Accuracy after pruning and training for 1 epoch 16 layer onwards: 16.140000 %
+Conv2d(256, 70, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 15: 16.650000 %
+27.0 28.0
+Accuracy after pruning and training for 1 epoch 15 layer onwards: 10.040000 %
+Conv2d(256, 52, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+c ^CTraceback (most recent call last):
+  File "test.py", line 313, in <module>
+    network.highway_layers[i].completely_pruned = True
+  File "test.py", line 235, in validate
+    outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 191, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 123, in forward
+    h = h * Variable(self.mask_h, requires_grad=False).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Conv2d(256, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 17: 62.150000 %
+39.0 40.0
+Accuracy after pruning and training for 1 epoch 17 layer onwards: 79.150000 %
+Conv2d(256, 33, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 16: 11.720000 %
+31.0 31.0
+Accuracy after pruning and training for 1 epoch 16 layer onwards: 15.310000 %
+Conv2d(256, 70, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 15: 16.630000 %
+27.0 28.0
+Accuracy after pruning and training for 1 epoch 15 layer onwards: 10.620000 %
+Conv2d(256, 52, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 14: 10.360000 %
+24.0 25.0
+Accuracy after pruning and training for 1 epoch 14 layer onwards: 9.600000 %
+Conv2d(256, 147, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 13: 9.520000 %
+20.0 20.0
+Accuracy after pruning and training for 1 epoch 13 layer onwards: 9.520000 %
+Conv2d(128, 21, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 11: 9.520000 %
+19.0 20.0
+Accuracy after pruning and training for 1 epoch 11 layer onwards: 9.520000 %
+19.0 20.0
+Accuracy after pruning and training for 2 epochs 11 layer onwards: 9.490000 %
+Conv2d(128, 11, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 10: 9.490000 %
+18.0 19.0
+Accuracy after pruning and training for 1 epoch 10 layer onwards: 9.480000 %
+18.0 19.0
+Accuracy after pruning and training for 2 epochs 10 layer onwards: 9.450000 %
+Conv2d(128, 30, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 9: 9.430000 %
+18.0 18.0
+Accuracy after pruning and training for 1 epoch 9 layer onwards: 9.470000 %
+18.0 18.0
+Accuracy after pruning and training for 2 epochs 9 layer onwards: 9.560000 %
+Conv2d(128, 79, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 8: 10.030000 %
+16.0 17.0
+Accuracy after pruning and training for 1 epoch 8 layer onwards: 10.160000 %
+16.0 17.0
+Accuracy after pruning and training for 2 epochs 8 layer onwards: 10.970000 %
+Conv2d(128, 126, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 7: 11.160000 %
+15.0 16.0
+Accuracy after pruning and training for 1 epoch 7 layer onwards: 11.180000 %
+15.0 16.0
+Accuracy after pruning and training for 2 epochs 7 layer onwards: 10.950000 %
+Conv2d(64, 35, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 5: 10.920000 %
+15.0 16.0
+Accuracy after pruning and training for 1 epoch 5 layer onwards: 12.370000 %
+15.0 16.0
+Accuracy after pruning and training for 2 epochs 5 layer onwards: 12.300000 %
+15.0 16.0
+Accuracy after pruning and training for 3 epochs 5 layer onwards: 12.040000 %
+Conv2d(64, 52, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 4: 11.170000 %
+15.0 16.0
+Accuracy after pruning and training for 1 epoch 4 layer onwards: 12.590000 %
+15.0 16.0
+Accuracy after pruning and training for 2 epochs 4 layer onwards: 12.360000 %
+15.0 16.0
+Accuracy after pruning and training for 3 epochs 4 layer onwards: 11.970000 %
+Conv2d(64, 49, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 3: 9.650000 %
+14.0 15.0
+Accuracy after pruning and training for 1 epoch 3 layer onwards: 9.770000 %
+14.0 15.0
+Accuracy after pruning and training for 2 epochs 3 layer onwards: 10.080000 %
+14.0 15.0
+Accuracy after pruning and training for 3 epochs 3 layer onwards: 10.260000 %
+Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 2: 9.990000 %
+13.0 14.0
+^CTraceback (most recent call last):
+  File "test.py", line 328, in <module>
+    print('Accuracy after pruning and training for 1 epoch %d layer onwards: %f %%' % (i, validate()))
+  File "test.py", line 235, in validate
+    outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 191, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 113, in forward
+    x_new = x_new * Variable(self.mask_x).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Traceback (most recent call last):
+  File "test.py", line 274, in <module>
+    print('Accuracy on valid set after restoring model: %f %%' % (epoch, validate()))
+TypeError: not all arguments converted during string formatting
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Accuracy on valid set after restoring model: 87.290000 %
+Conv2d(256, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 17: 62.150000 %
+^CTraceback (most recent call last):
+  File "test.py", line 319, in <module>
+    train()
+  File "test.py", line 221, in train
+    outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 191, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 123, in forward
+    h = h * Variable(self.mask_h, requires_grad=False).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Accuracy on valid set after restoring model: 87.290000 %
+^CTraceback (most recent call last):
+  File "test.py", line 277, in <module>
+    outputs, t_batch = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), get_t=True)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 191, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 123, in forward
+    h = h * Variable(self.mask_h, requires_grad=False).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Accuracy on valid set after restoring model: 87.290000 %
+Conv2d(256, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 17: 82.350000 %
+47.0 48.0
+Accuracy after pruning and training for 1 epoch 17 layer onwards: 85.240000 %
+Conv2d(256, 30, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 16: 70.930000 %
+50.0 51.0
+Accuracy after pruning and training for 1 epoch 16 layer onwards: 84.190000 %
+Conv2d(256, 55, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 15: 22.850000 %
+68.0 70.0
+Accuracy after pruning and training for 1 epoch 15 layer onwards: 85.390000 %
+Conv2d(256, 44, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 14: 23.010000 %
+86.0 87.0
+Accuracy after pruning and training for 1 epoch 14 layer onwards: 85.460000 %
+Conv2d(256, 106, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 13: 17.800000 %
+114.0 116.0
+Accuracy after pruning and training for 1 epoch 13 layer onwards: 81.120000 %
+Conv2d(128, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 11: 10.220000 %
+114.0 115.0
+Accuracy after pruning and training for 1 epoch 11 layer onwards: 81.340000 %
+114.0 115.0
+Accuracy after pruning and training for 2 epochs 11 layer onwards: 82.110000 %
+Conv2d(128, 3, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 10: 9.770000 %
+114.0 115.0
+Accuracy after pruning and training for 1 epoch 10 layer onwards: 81.760000 %
+114.0 115.0
+Accuracy after pruning and training for 2 epochs 10 layer onwards: 82.180000 %
+Conv2d(128, 9, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 9: 9.450000 %
+117.0 118.0
+Accuracy after pruning and training for 1 epoch 9 layer onwards: 81.450000 %
+117.0 118.0
+Accuracy after pruning and training for 2 epochs 9 layer onwards: 81.710000 %
+Conv2d(128, 33, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 8: 10.220000 %
+129.0 130.0
+Accuracy after pruning and training for 1 epoch 8 layer onwards: 78.050000 %
+129.0 130.0
+Accuracy after pruning and training for 2 epochs 8 layer onwards: 78.950000 %
+Conv2d(128, 81, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 7: 10.220000 %
+151.0 152.0
+Accuracy after pruning and training for 1 epoch 7 layer onwards: 72.820000 %
+151.0 152.0
+Accuracy after pruning and training for 2 epochs 7 layer onwards: 75.000000 %
+Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 5: 11.030000 %
+151.0 152.0
+Accuracy after pruning and training for 1 epoch 5 layer onwards: 76.090000 %
+151.0 152.0
+Accuracy after pruning and training for 2 epochs 5 layer onwards: 77.010000 %
+151.0 152.0
+Accuracy after pruning and training for 3 epochs 5 layer onwards: 77.680000 %
+Conv2d(64, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 4: 10.550000 %
+154.0 156.0
+Accuracy after pruning and training for 1 epoch 4 layer onwards: 77.440000 %
+154.0 156.0
+Accuracy after pruning and training for 2 epochs 4 layer onwards: 78.370000 %
+154.0 156.0
+Accuracy after pruning and training for 3 epochs 4 layer onwards: 78.830000 %
+Conv2d(64, 6, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 3: 9.730000 %
+156.0 158.0
+Accuracy after pruning and training for 1 epoch 3 layer onwards: 76.190000 %
+156.0 158.0
+Accuracy after pruning and training for 2 epochs 3 layer onwards: 77.370000 %
+156.0 158.0
+Accuracy after pruning and training for 3 epochs 3 layer onwards: 78.180000 %
+Conv2d(64, 45, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 2: 10.220000 %
+160.0 161.0
+Accuracy after pruning and training for 1 epoch 2 layer onwards: 78.680000 %
+160.0 161.0
+Accuracy after pruning and training for 2 epochs 2 layer onwards: 79.200000 %
+160.0 161.0
+Accuracy after pruning and training for 3 epochs 2 layer onwards: 79.500000 %
+Conv2d(64, 52, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after completely pruning layer 1: 10.140000 %
+162.0 164.0
+Accuracy after pruning and training for 1 epoch 1 layer onwards: 79.570000 %
+^CTraceback (most recent call last):
+  File "test.py", line 329, in <module>
+    elif i > 6:
+  File "test.py", line 225, in train
+    outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/utils/clip_grad.py", line 25, in clip_grad_norm
+    param_norm = p.grad.data.norm(norm_type)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Conv2d(10, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Traceback (most recent call last):
+  File "test.py", line 322, in <module>
+    print('Accuracy on valid set after completely pruning layer %d: %f %%' % (i, validate()))
+  File "test.py", line 239, in validate
+    outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 195, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 99, in forward
+    h = self.conv(F.relu6(self.batch_norm(x)))
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/conv.py", line 237, in forward
+    self.padding, self.dilation, self.groups)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/functional.py", line 39, in conv2d
+    return f(input, weight, bias)
+RuntimeError: CUDNN_STATUS_BAD_PARAM
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Conv2d(10, 10, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Traceback (most recent call last):
+  File "test.py", line 322, in <module>
+    print('Accuracy on valid set after completely pruning layer %d: %f %%' % (i, validate()))
+  File "test.py", line 239, in validate
+    outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 195, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 99, in forward
+    h = self.conv(F.relu6(self.batch_norm(x)))
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/conv.py", line 237, in forward
+    self.padding, self.dilation, self.groups)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/functional.py", line 39, in conv2d
+    return f(input, weight, bias)
+RuntimeError: CUDNN_STATUS_BAD_PARAM
+(tf)dhananjay@o990:~/CHN/cifar_highway$ exit
+dhananjay@o990:~/CHN/cifar_highway$ x[Ksource /home/dhananjay/common.sh 
+(tf)dhananjay@o990:~/CHN/cifar_highway$ export CUDA_VISIBLE_DEVICES=0
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+Conv2d(256, 246, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 17: 86.990000 %
+47.0 48.0
+Accuracy after pruning and training for 1 epoch layer 17 onwards: 87.060000 %
+Conv2d(256, 237, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 16: 86.990000 %
+48.0 48.0
+Accuracy after pruning and training for 1 epoch layer 16 onwards: 86.940000 %
+Conv2d(256, 254, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 15: 86.580000 %
+48.0 49.0
+Accuracy after pruning and training for 1 epoch layer 15 onwards: 86.930000 %
+Conv2d(256, 254, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+^CTraceback (most recent call last):
+  File "test.py", line 306, in <module>
+    rem.append(j)
+  File "test.py", line 231, in validate
+    outputs = network(Variable(valid_x[cursor:min(cursor + batch_size, len(valid_x))]), train_mode=False)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 187, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "test.py", line 126, in forward
+    t = t * Variable(self.mask_h, requires_grad=False).cuda()
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 240, in cuda
+    return CudaTransfer(device_id, async)(self)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/_functions/tensor.py", line 160, in forward
+    return i.cuda(async=self.async)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/_utils.py", line 65, in _cuda
+    return new_type(self.size()).copy_(self, async)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway$ python test.py 
+Number of training examples : 40000
+47.0 48.0
+For epoch 0 	Accuracy on valid set: 87.050000 %
+47.0 48.0
+For epoch 1 	Accuracy on valid set: 87.070000 %
+47.0 48.0
+For epoch 2 	Accuracy on valid set: 87.030000 %
+47.0 48.0
+For epoch 3 	Accuracy on valid set: 87.060000 %
+47.0 48.0
+For epoch 4 	Accuracy on valid set: 87.070000 %
+47.0 47.0
+For epoch 5 	Accuracy on valid set: 87.040000 %
+47.0 47.0
+For epoch 6 	Accuracy on valid set: 87.050000 %
+47.0 47.0
+For epoch 7 	Accuracy on valid set: 87.040000 %
+46.0 47.0
+For epoch 8 	Accuracy on valid set: 87.010000 %
+46.0 47.0
+For epoch 9 	Accuracy on valid set: 86.980000 %
+46.0 47.0
+For epoch 10 	Accuracy on valid set: 86.970000 %
+46.0 47.0
+For epoch 11 	Accuracy on valid set: 86.960000 %
+46.0 47.0
+For epoch 12 	Accuracy on valid set: 86.930000 %
+46.0 47.0
+For epoch 13 	Accuracy on valid set: 86.970000 %
+46.0 47.0
+For epoch 14 	Accuracy on valid set: 86.960000 %
+46.0 47.0
+For epoch 15 	Accuracy on valid set: 86.970000 %
+46.0 47.0
+For epoch 16 	Accuracy on valid set: 86.970000 %
+46.0 47.0
+For epoch 17 	Accuracy on valid set: 86.980000 %
+46.0 47.0
+For epoch 18 	Accuracy on valid set: 86.950000 %
+46.0 47.0
+For epoch 19 	Accuracy on valid set: 86.950000 %
+46.0 47.0
+For epoch 20 	Accuracy on valid set: 86.980000 %
+46.0 47.0
+For epoch 21 	Accuracy on valid set: 86.920000 %
+46.0 47.0
+For epoch 22 	Accuracy on valid set: 86.940000 %
+46.0 47.0
+For epoch 23 	Accuracy on valid set: 86.910000 %
+46.0 47.0
+For epoch 24 	Accuracy on valid set: 86.920000 %
+46.0 47.0
+For epoch 25 	Accuracy on valid set: 86.920000 %
+46.0 47.0
+For epoch 26 	Accuracy on valid set: 86.860000 %
+46.0 47.0
+For epoch 27 	Accuracy on valid set: 86.880000 %
+46.0 47.0
+For epoch 28 	Accuracy on valid set: 86.860000 %
+46.0 47.0
+For epoch 29 	Accuracy on valid set: 86.890000 %
+46.0 47.0
+For epoch 30 	Accuracy on valid set: 86.850000 %
+46.0 47.0
+For epoch 31 	Accuracy on valid set: 86.880000 %
+46.0 47.0
+For epoch 32 	Accuracy on valid set: 86.910000 %
+46.0 47.0
+For epoch 33 	Accuracy on valid set: 86.870000 %
+46.0 47.0
+For epoch 34 	Accuracy on valid set: 86.900000 %
+46.0 47.0
+For epoch 35 	Accuracy on valid set: 86.880000 %
+46.0 47.0
+For epoch 36 	Accuracy on valid set: 86.900000 %
+46.0 47.0
+For epoch 37 	Accuracy on valid set: 86.910000 %
+46.0 47.0
+For epoch 38 	Accuracy on valid set: 86.850000 %
+46.0 47.0
+For epoch 39 	Accuracy on valid set: 86.910000 %
+46.0 47.0
+For epoch 40 	Accuracy on valid set: 86.860000 %
+46.0 47.0
+For epoch 41 	Accuracy on valid set: 86.910000 %
+46.0 47.0
+For epoch 42 	Accuracy on valid set: 86.890000 %
+46.0 47.0
+For epoch 43 	Accuracy on valid set: 86.870000 %
+46.0 47.0
+For epoch 44 	Accuracy on valid set: 86.880000 %
+46.0 47.0
+For epoch 45 	Accuracy on valid set: 86.870000 %
+46.0 47.0
+For epoch 46 	Accuracy on valid set: 86.880000 %
+46.0 47.0
+For epoch 47 	Accuracy on valid set: 86.860000 %
+46.0 47.0
+For epoch 48 	Accuracy on valid set: 86.900000 %
+46.0 47.0
+For epoch 49 	Accuracy on valid set: 86.910000 %
+Conv2d(256, 11, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 17: 82.130000 %
+46.0 47.0
+Accuracy after pruning and training for 1 epoch layer 17 onwards: 85.280000 %
+Conv2d(256, 35, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 16: 71.250000 %
+50.0 51.0
+Accuracy after pruning and training for 1 epoch layer 16 onwards: 84.330000 %
+Conv2d(256, 76, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 15: 13.660000 %
+64.0 65.0
+Accuracy after pruning and training for 1 epoch layer 15 onwards: 85.460000 %
+Conv2d(256, 83, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 14: 9.800000 %
+82.0 84.0
+Accuracy after pruning and training for 1 epoch layer 14 onwards: 85.370000 %
+Conv2d(256, 219, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 13: 17.970000 %
+86.0 87.0
+Accuracy after pruning and training for 1 epoch layer 13 onwards: 85.340000 %
+Conv2d(128, 49, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 11: 11.490000 %
+103.0 105.0
+Accuracy after pruning and training for 1 epoch layer 11 onwards: 59.150000 %
+103.0 105.0
+Accuracy after pruning and training for 2 epochs layer 11 onwards: 66.450000 %
+Conv2d(128, 53, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 10: 10.160000 %
+121.0 123.0
+Accuracy after pruning and training for 1 epoch layer 10 onwards: 53.600000 %
+121.0 123.0
+Accuracy after pruning and training for 2 epochs layer 10 onwards: 58.110000 %
+Conv2d(128, 77, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 9: 10.270000 %
+134.0 136.0
+Accuracy after pruning and training for 1 epoch layer 9 onwards: 54.020000 %
+135.0 136.0
+Accuracy after pruning and training for 2 epochs layer 9 onwards: 57.970000 %
+Conv2d(128, 112, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 8: 10.220000 %
+143.0 145.0
+Accuracy after pruning and training for 1 epoch layer 8 onwards: 61.630000 %
+143.0 145.0
+Accuracy after pruning and training for 2 epochs layer 8 onwards: 64.020000 %
+Conv2d(128, 127, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 7: 21.310000 %
+144.0 146.0
+Accuracy after pruning and training for 1 epoch layer 7 onwards: 66.990000 %
+144.0 146.0
+Accuracy after pruning and training for 2 epochs layer 7 onwards: 68.800000 %
+Conv2d(64, 63, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 5: 65.970000 %
+144.0 146.0
+Accuracy after pruning and training for 1 epoch layer 5 onwards: 70.210000 %
+144.0 146.0
+Accuracy after pruning and training for 2 epochs layer 5 onwards: 71.440000 %
+144.0 146.0
+Accuracy after pruning and training for 3 epochs layer 5 onwards: 72.680000 %
+Conv2d(64, 63, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 4: 68.070000 %
+145.0 147.0
+Accuracy after pruning and training for 1 epoch layer 4 onwards: 73.920000 %
+145.0 147.0
+Accuracy after pruning and training for 2 epochs layer 4 onwards: 74.840000 %
+145.0 147.0
+Accuracy after pruning and training for 3 epochs layer 4 onwards: 75.720000 %
+Conv2d(64, 59, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 3: 15.640000 %
+146.0 148.0
+Accuracy after pruning and training for 1 epoch layer 3 onwards: 76.340000 %
+146.0 148.0
+Accuracy after pruning and training for 2 epochs layer 3 onwards: 76.860000 %
+146.0 148.0
+Accuracy after pruning and training for 3 epochs layer 3 onwards: 77.410000 %
+Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 2: 77.410000 %
+146.0 148.0
+Accuracy after pruning and training for 1 epoch layer 2 onwards: 77.990000 %
+147.0 148.0
+Accuracy after pruning and training for 2 epochs layer 2 onwards: 78.680000 %
+147.0 149.0
+Accuracy after pruning and training for 3 epochs layer 2 onwards: 79.200000 %
+Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 1: 79.200000 %
+147.0 149.0
+Accuracy after pruning and training for 1 epoch layer 1 onwards: 79.720000 %
+147.0 149.0
+Accuracy after pruning and training for 2 epochs layer 1 onwards: 80.000000 %
+147.0 149.0
+Accuracy after pruning and training for 3 epochs layer 1 onwards: 80.380000 %
+148.0 149.0
+For epoch 1 	Accuracy on valid set: 82.820000 %
+148.0 149.0
+For epoch 2 	Accuracy on valid set: 83.940000 %
+148.0 150.0
+For epoch 3 	Accuracy on valid set: 84.550000 %
+148.0 150.0
+For epoch 4 	Accuracy on valid set: 85.120000 %
+149.0 151.0
+For epoch 5 	Accuracy on valid set: 85.530000 %
+149.0 152.0
+For epoch 6 	Accuracy on valid set: 85.650000 %
+150.0 152.0
+For epoch 7 	Accuracy on valid set: 86.050000 %
+151.0 153.0
+For epoch 8 	Accuracy on valid set: 86.170000 %
+152.0 154.0
+For epoch 9 	Accuracy on valid set: 86.370000 %
+152.0 154.0
+For epoch 10 	Accuracy on valid set: 86.560000 %
+153.0 156.0
+For epoch 11 	Accuracy on valid set: 86.470000 %
+153.0 156.0
+For epoch 12 	Accuracy on valid set: 86.720000 %
+154.0 157.0
+For epoch 13 	Accuracy on valid set: 86.850000 %
+155.0 157.0
+For epoch 14 	Accuracy on valid set: 86.880000 %
+155.0 158.0
+For epoch 15 	Accuracy on valid set: 86.940000 %
+156.0 159.0
+For epoch 16 	Accuracy on valid set: 87.040000 %
+157.0 159.0
+For epoch 17 	Accuracy on valid set: 87.020000 %
+157.0 160.0
+For epoch 18 	Accuracy on valid set: 87.230000 %
+158.0 161.0
+For epoch 19 	Accuracy on valid set: 87.160000 %
+159.0 161.0
+For epoch 20 	Accuracy on valid set: 87.230000 %
+(tf)dhananjay@o990:~/CHN/cifar_highway$ 
