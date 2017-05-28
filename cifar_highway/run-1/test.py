@@ -300,10 +300,10 @@ for epoch in xrange(1, epochs + 1):
                 threshold = 0.015
             elif i < 12:
                 max_values = max_values2[i % 6]
-                threshold = 0.020
+                threshold = 0.025
             else:
                 max_values = max_values3[i % 6]
-                threshold = 0.020
+                threshold = 0.035
             for j in xrange(len(max_values)):
                 if max_values[j] < threshold:
                     rem.append(j)
