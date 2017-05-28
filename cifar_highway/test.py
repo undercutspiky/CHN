@@ -281,6 +281,11 @@ for epoch in xrange(1, epochs + 1):
         max_values1 = np.max(t_values1, axis=0)
         max_values2 = np.max(t_values2, axis=0)
         max_values3 = np.max(t_values3, axis=0)
+        np.save('max_values1', max_values1)
+        np.save('max_values2', max_values2)
+        np.save('max_values3', max_values3)
+        threshold = 0.015
+        layers_to_remove = []
 
         for param in network.parameters():
             param.requires_grad = False
@@ -292,18 +297,23 @@ for epoch in xrange(1, epochs + 1):
             ret, rem = [], []
             if i < 6:
                 max_values = max_values1[i % 6]
+                threshold = 0.015
             elif i < 12:
                 max_values = max_values2[i % 6]
+                threshold = 0.020
             else:
                 max_values = max_values3[i % 6]
+                threshold = 0.020
             for j in xrange(len(max_values)):
-                if max_values[j] < 0.015:
+                if max_values[j] < threshold:
                     rem.append(j)
                 else:
                     ret.append(j)
             network.highway_layers[i].prune(ret, rem)
             if not network.highway_layers[i].completely_pruned:
                 print network.highway_layers[i].conv
+            else:
+                layers_to_remove.append(i)
 
             print('Accuracy on valid set after pruning layer %d: %f %%' % (i, validate()))
 
@@ -326,10 +336,16 @@ for epoch in xrange(1, epochs + 1):
                 print('Accuracy after pruning and training for 3 epochs layer %d onwards: %f %%' % (i, validate()))
         for param in network.parameters():
             param.requires_grad = True
+        layers = nn.ModuleList()
+        # Don't remove dimensionality changing layers using the loop below !
+        for i, l in enumerate(network.highway_layers):
+            if i not in layers_to_remove:
+                layers.append(network.highway_layers[i])
+        network.highway_layers = layers
 
     train()
 
     cursor, correct, total = 0, 0, 0
 
     print('For epoch %d \tAccuracy on valid set: %f %%' % (epoch, validate()))
-save_state('pruned2')
+save_state('pruned3')
