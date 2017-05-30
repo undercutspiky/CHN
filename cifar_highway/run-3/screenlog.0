@@ -1,0 +1,846 @@
+dhananjay@o990:~/CHN/cifar_highway/run-2$ source /home/dhananjay/common.sh 
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-2$ export CUDA_VISIBLE_DEVICES-[K=0
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-2$ python wide-highway.py 
+Number of training examples : 40000
+1109.0 1760.0
+For epoch 1 	Accuracy on valid set: 31.170000 %
+1045.0 1381.0
+For epoch 2 	Accuracy on valid set: 59.730000 %
+1063.0 1231.0
+For epoch 3 	Accuracy on valid set: 58.990000 %
+1060.0 1204.0
+For epoch 4 	Accuracy on valid set: 73.420000 %
+1071.0 1170.0
+For epoch 5 	Accuracy on valid set: 76.570000 %
+1065.0 1167.0
+For epoch 6 	Accuracy on valid set: 78.250000 %
+1080.0 1163.0
+For epoch 7 	Accuracy on valid set: 81.520000 %
+1085.0 1176.0
+For epoch 8 	Accuracy on valid set: 80.240000 %
+1092.0 1169.0
+For epoch 9 	Accuracy on valid set: 81.610000 %
+1093.0 1153.0
+For epoch 10 	Accuracy on valid set: 79.470000 %
+1104.0 1161.0
+For epoch 11 	Accuracy on valid set: 82.310000 %
+1118.0 1163.0
+For epoch 12 	Accuracy on valid set: 80.300000 %
+1123.0 1163.0
+For epoch 13 	Accuracy on valid set: 83.900000 %
+1138.0 1177.0
+For epoch 14 	Accuracy on valid set: 81.850000 %
+1149.0 1187.0
+For epoch 15 	Accuracy on valid set: 83.030000 %
+1157.0 1195.0
+For epoch 16 	Accuracy on valid set: 83.000000 %
+1173.0 1201.0
+For epoch 17 	Accuracy on valid set: 79.120000 %
+1181.0 1214.0
+For epoch 18 	Accuracy on valid set: 80.890000 %
+1192.0 1220.0
+For epoch 19 	Accuracy on valid set: 82.190000 %
+1204.0 1227.0
+For epoch 20 	Accuracy on valid set: 83.450000 %
+1213.0 1239.0
+For epoch 21 	Accuracy on valid set: 81.740000 %
+1223.0 1244.0
+For epoch 22 	Accuracy on valid set: 81.460000 %
+1231.0 1257.0
+For epoch 23 	Accuracy on valid set: 81.680000 %
+1241.0 1267.0
+For epoch 24 	Accuracy on valid set: 82.560000 %
+1251.0 1273.0
+For epoch 25 	Accuracy on valid set: 77.150000 %
+1260.0 1284.0
+For epoch 26 	Accuracy on valid set: 83.430000 %
+1267.0 1289.0
+For epoch 27 	Accuracy on valid set: 79.910000 %
+1275.0 1292.0
+For epoch 28 	Accuracy on valid set: 84.020000 %
+1281.0 1302.0
+For epoch 29 	Accuracy on valid set: 81.610000 %
+1288.0 1307.0
+For epoch 30 	Accuracy on valid set: 84.330000 %
+1295.0 1312.0
+For epoch 31 	Accuracy on valid set: 81.700000 %
+1301.0 1321.0
+For epoch 32 	Accuracy on valid set: 80.270000 %
+1307.0 1324.0
+For epoch 33 	Accuracy on valid set: 83.710000 %
+1311.0 1330.0
+For epoch 34 	Accuracy on valid set: 83.910000 %
+1315.0 1336.0
+For epoch 35 	Accuracy on valid set: 81.600000 %
+1322.0 1339.0
+For epoch 36 	Accuracy on valid set: 81.640000 %
+1326.0 1347.0
+For epoch 37 	Accuracy on valid set: 82.710000 %
+1331.0 1349.0
+For epoch 38 	Accuracy on valid set: 82.560000 %
+1337.0 1348.0
+For epoch 39 	Accuracy on valid set: 83.010000 %
+1340.0 1354.0
+For epoch 40 	Accuracy on valid set: 83.460000 %
+1344.0 1358.0
+For epoch 41 	Accuracy on valid set: 83.190000 %
+1346.0 1363.0
+For epoch 42 	Accuracy on valid set: 81.560000 %
+1350.0 1367.0
+For epoch 43 	Accuracy on valid set: 80.670000 %
+1353.0 1366.0
+For epoch 44 	Accuracy on valid set: 83.850000 %
+1357.0 1373.0
+For epoch 45 	Accuracy on valid set: 81.950000 %
+1359.0 1374.0
+For epoch 46 	Accuracy on valid set: 83.690000 %
+1360.0 1379.0
+For epoch 47 	Accuracy on valid set: 81.200000 %
+1361.0 1377.0
+For epoch 48 	Accuracy on valid set: 78.580000 %
+1363.0 1379.0
+For epoch 49 	Accuracy on valid set: 81.580000 %
+1366.0 1382.0
+For epoch 50 	Accuracy on valid set: 81.670000 %
+1369.0 1386.0
+For epoch 51 	Accuracy on valid set: 80.620000 %
+1369.0 1385.0
+For epoch 52 	Accuracy on valid set: 83.630000 %
+1373.0 1387.0
+For epoch 53 	Accuracy on valid set: 82.190000 %
+1372.0 1387.0
+For epoch 54 	Accuracy on valid set: 83.440000 %
+1375.0 1388.0
+For epoch 55 	Accuracy on valid set: 82.630000 %
+1376.0 1388.0
+For epoch 56 	Accuracy on valid set: 83.140000 %
+1376.0 1388.0
+For epoch 57 	Accuracy on valid set: 81.130000 %
+1377.0 1392.0
+For epoch 58 	Accuracy on valid set: 83.350000 %
+1379.0 1392.0
+For epoch 59 	Accuracy on valid set: 83.560000 %
+1380.0 1393.0
+For epoch 60 	Accuracy on valid set: 83.480000 %
+1382.0 1395.0
+For epoch 61 	Accuracy on valid set: 83.580000 %
+1382.0 1396.0
+For epoch 62 	Accuracy on valid set: 83.170000 %
+1383.0 1397.0
+For epoch 63 	Accuracy on valid set: 83.420000 %
+1383.0 1397.0
+For epoch 64 	Accuracy on valid set: 81.730000 %
+1386.0 1398.0
+For epoch 65 	Accuracy on valid set: 82.720000 %
+1385.0 1399.0
+For epoch 66 	Accuracy on valid set: 84.020000 %
+1385.0 1399.0
+For epoch 67 	Accuracy on valid set: 82.800000 %
+1386.0 1399.0
+For epoch 68 	Accuracy on valid set: 81.440000 %
+1386.0 1398.0
+For epoch 69 	Accuracy on valid set: 83.450000 %
+1388.0 1401.0
+For epoch 70 	Accuracy on valid set: 80.630000 %
+1387.0 1400.0
+For epoch 71 	Accuracy on valid set: 84.350000 %
+1388.0 1402.0
+For epoch 72 	Accuracy on valid set: 82.950000 %
+1389.0 1400.0
+For epoch 73 	Accuracy on valid set: 80.410000 %
+1389.0 1407.0
+For epoch 74 	Accuracy on valid set: 83.730000 %
+1389.0 1400.0
+For epoch 75 	Accuracy on valid set: 83.100000 %
+1390.0 1404.0
+For epoch 76 	Accuracy on valid set: 83.070000 %
+1390.0 1400.0
+For epoch 77 	Accuracy on valid set: 80.970000 %
+1390.0 1404.0
+For epoch 78 	Accuracy on valid set: 77.010000 %
+1391.0 1404.0
+For epoch 79 	Accuracy on valid set: 82.500000 %
+1391.0 1408.0
+For epoch 80 	Accuracy on valid set: 88.680000 %
+1391.0 1408.0
+For epoch 81 	Accuracy on valid set: 88.960000 %
+1391.0 1407.0
+For epoch 82 	Accuracy on valid set: 89.070000 %
+1392.0 1406.0
+For epoch 83 	Accuracy on valid set: 89.080000 %
+1391.0 1407.0
+For epoch 84 	Accuracy on valid set: 89.180000 %
+1391.0 1405.0
+For epoch 85 	Accuracy on valid set: 89.190000 %
+1391.0 1405.0
+For epoch 86 	Accuracy on valid set: 89.150000 %
+1390.0 1404.0
+For epoch 87 	Accuracy on valid set: 89.350000 %
+1390.0 1405.0
+For epoch 88 	Accuracy on valid set: 89.250000 %
+1390.0 1403.0
+For epoch 89 	Accuracy on valid set: 89.270000 %
+1390.0 1405.0
+For epoch 90 	Accuracy on valid set: 89.260000 %
+1390.0 1403.0
+For epoch 91 	Accuracy on valid set: 89.250000 %
+1390.0 1402.0
+For epoch 92 	Accuracy on valid set: 89.290000 %
+1389.0 1402.0
+For epoch 93 	Accuracy on valid set: 89.380000 %
+1390.0 1402.0
+For epoch 94 	Accuracy on valid set: 89.290000 %
+1389.0 1402.0
+For epoch 95 	Accuracy on valid set: 89.410000 %
+1389.0 1401.0
+For epoch 96 	Accuracy on valid set: 89.130000 %
+1389.0 1401.0
+For epoch 97 	Accuracy on valid set: 89.350000 %
+1389.0 1401.0
+For epoch 98 	Accuracy on valid set: 89.240000 %
+1389.0 1401.0
+For epoch 99 	Accuracy on valid set: 89.390000 %
+1389.0 1401.0
+For epoch 100 	Accuracy on valid set: 89.310000 %
+1389.0 1401.0
+For epoch 101 	Accuracy on valid set: 89.230000 %
+1389.0 1400.0
+For epoch 102 	Accuracy on valid set: 89.290000 %
+1389.0 1400.0
+For epoch 103 	Accuracy on valid set: 89.360000 %
+1389.0 1398.0
+For epoch 104 	Accuracy on valid set: 89.210000 %
+1389.0 1399.0
+For epoch 105 	Accuracy on valid set: 89.390000 %
+1388.0 1400.0
+For epoch 106 	Accuracy on valid set: 89.270000 %
+1389.0 1399.0
+For epoch 107 	Accuracy on valid set: 89.350000 %
+1388.0 1399.0
+For epoch 108 	Accuracy on valid set: 89.310000 %
+1388.0 1399.0
+For epoch 109 	Accuracy on valid set: 89.150000 %
+1389.0 1396.0
+For epoch 110 	Accuracy on valid set: 89.250000 %
+1389.0 1398.0
+For epoch 111 	Accuracy on valid set: 89.300000 %
+1388.0 1397.0
+For epoch 112 	Accuracy on valid set: 89.330000 %
+1388.0 1398.0
+For epoch 113 	Accuracy on valid set: 89.180000 %
+1388.0 1398.0
+For epoch 114 	Accuracy on valid set: 89.310000 %
+1388.0 1398.0
+For epoch 115 	Accuracy on valid set: 89.250000 %
+1388.0 1397.0
+For epoch 116 	Accuracy on valid set: 89.290000 %
+1388.0 1397.0
+For epoch 117 	Accuracy on valid set: 89.250000 %
+1389.0 1397.0
+For epoch 118 	Accuracy on valid set: 89.320000 %
+1388.0 1397.0
+For epoch 119 	Accuracy on valid set: 89.230000 %
+1388.0 1396.0
+For epoch 120 	Accuracy on valid set: 89.160000 %
+1387.0 1397.0
+For epoch 121 	Accuracy on valid set: 89.220000 %
+1388.0 1397.0
+For epoch 122 	Accuracy on valid set: 89.130000 %
+1388.0 1397.0
+For epoch 123 	Accuracy on valid set: 89.260000 %
+1389.0 1396.0
+For epoch 124 	Accuracy on valid set: 89.260000 %
+1388.0 1396.0
+For epoch 125 	Accuracy on valid set: 89.260000 %
+1388.0 1397.0
+For epoch 126 	Accuracy on valid set: 89.300000 %
+1388.0 1396.0
+For epoch 127 	Accuracy on valid set: 89.200000 %
+1388.0 1396.0
+For epoch 128 	Accuracy on valid set: 89.220000 %
+1388.0 1396.0
+For epoch 129 	Accuracy on valid set: 89.220000 %
+1388.0 1397.0
+For epoch 130 	Accuracy on valid set: 89.230000 %
+1388.0 1396.0
+For epoch 131 	Accuracy on valid set: 89.320000 %
+1388.0 1396.0
+For epoch 132 	Accuracy on valid set: 89.240000 %
+1388.0 1397.0
+For epoch 133 	Accuracy on valid set: 89.200000 %
+1388.0 1396.0
+For epoch 134 	Accuracy on valid set: 89.230000 %
+1388.0 1397.0
+For epoch 135 	Accuracy on valid set: 89.230000 %
+1388.0 1396.0
+For epoch 136 	Accuracy on valid set: 89.250000 %
+1388.0 1395.0
+For epoch 137 	Accuracy on valid set: 89.190000 %
+1388.0 1397.0
+For epoch 138 	Accuracy on valid set: 89.190000 %
+1388.0 1396.0
+For epoch 139 	Accuracy on valid set: 89.200000 %
+1388.0 1397.0
+For epoch 140 	Accuracy on valid set: 89.290000 %
+1388.0 1396.0
+For epoch 141 	Accuracy on valid set: 89.150000 %
+1388.0 1397.0
+For epoch 142 	Accuracy on valid set: 89.210000 %
+1388.0 1398.0
+For epoch 143 	Accuracy on valid set: 89.210000 %
+1388.0 1396.0
+For epoch 144 	Accuracy on valid set: 89.240000 %
+1388.0 1397.0
+For epoch 145 	Accuracy on valid set: 89.170000 %
+1388.0 1396.0
+For epoch 146 	Accuracy on valid set: 89.300000 %
+1388.0 1396.0
+For epoch 147 	Accuracy on valid set: 89.210000 %
+1388.0 1396.0
+For epoch 148 	Accuracy on valid set: 89.190000 %
+1388.0 1397.0
+For epoch 149 	Accuracy on valid set: 89.300000 %
+1388.0 1396.0
+For epoch 150 	Accuracy on valid set: 89.170000 %
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-2$ python incentivize.py 
+Number of training examples : 40000
+1375.0 1394.0
+For epoch 150 	Accuracy on valid set: 89.310000 %
+1371.0 1377.0
+For epoch 151 	Accuracy on valid set: 89.230000 %
+1367.0 1373.0
+For epoch 152 	Accuracy on valid set: 89.250000 %
+1364.0 1369.0
+For epoch 153 	Accuracy on valid set: 89.160000 %
+1360.0 1365.0
+For epoch 154 	Accuracy on valid set: 89.190000 %
+1357.0 1362.0
+For epoch 155 	Accuracy on valid set: 89.130000 %
+1354.0 1358.0
+For epoch 156 	Accuracy on valid set: 89.220000 %
+dhananjay@o990:~/CHN/cifar_highway/run-3$ source /c[Khome/dhananjay/common.sh 
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-3$ export CUDA_VS[KISIBLE_DEVICES=1
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-3$ python incentivize.py 
+Number of training examples : 40000
+1246.0 1391.0
+For epoch 150 	Accuracy on valid set: 80.900000 %
+1199.0 1247.0
+For epoch 151 	Accuracy on valid set: 74.310000 %
+^CTraceback (most recent call last):
+  File "incentivize.py", line 228, in <module>
+    outputs, t_cost = network(Variable(train_x[cursor:min(cursor + batch_size, len(train_x))]))
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "incentivize.py", line 155, in forward
+    net, t = self.highway_layers[iii](net, train_mode=train_mode)
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/nn/modules/module.py", line 206, in __call__
+    result = self.forward(*input, **kwargs)
+  File "incentivize.py", line 124, in forward
+    t = torch.squeeze(F.pad(t.unsqueeze(0), (0, 0, 0, 0, 0, x_new.size(1) - t.size(1)), mode='replicate'))
+  File "/home/dhananjay/tf/lib/python2.7/site-packages/torch/autograd/variable.py", line 62, in __getattr__
+    return getattr(self.data, name)
+KeyboardInterrupt
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-3$ python incentivize.py 
+Number of training examples : 40000
+1226.0 1390.0
+For epoch 150 	Accuracy on valid set: 77.890000 %
+1192.0 1227.0
+For epoch 151 	Accuracy on valid set: 80.300000 %
+1157.0 1193.0
+For epoch 152 	Accuracy on valid set: 77.040000 %
+1121.0 1159.0
+For epoch 153 	Accuracy on valid set: 82.340000 %
+1071.0 1123.0
+For epoch 154 	Accuracy on valid set: 80.010000 %
+1010.0 1071.0
+For epoch 155 	Accuracy on valid set: 81.320000 %
+946.0 1012.0
+For epoch 156 	Accuracy on valid set: 84.460000 %
+890.0 946.0
+For epoch 157 	Accuracy on valid set: 81.620000 %
+842.0 891.0
+For epoch 158 	Accuracy on valid set: 81.440000 %
+798.0 843.0
+For epoch 159 	Accuracy on valid set: 79.680000 %
+759.0 800.0
+For epoch 160 	Accuracy on valid set: 81.760000 %
+706.0 760.0
+For epoch 161 	Accuracy on valid set: 82.480000 %
+633.0 708.0
+For epoch 162 	Accuracy on valid set: 81.030000 %
+553.0 636.0
+For epoch 163 	Accuracy on valid set: 82.560000 %
+476.0 557.0
+For epoch 164 	Accuracy on valid set: 81.440000 %
+406.0 478.0
+For epoch 165 	Accuracy on valid set: 80.360000 %
+374.0 407.0
+For epoch 166 	Accuracy on valid set: 73.830000 %
+352.0 377.0
+For epoch 167 	Accuracy on valid set: 76.750000 %
+329.0 357.0
+For epoch 168 	Accuracy on valid set: 77.860000 %
+318.0 332.0
+For epoch 169 	Accuracy on valid set: 81.950000 %
+303.0 325.0
+For epoch 170 	Accuracy on valid set: 81.410000 %
+289.0 308.0
+For epoch 171 	Accuracy on valid set: 80.400000 %
+282.0 294.0
+For epoch 172 	Accuracy on valid set: 82.340000 %
+274.0 285.0
+For epoch 173 	Accuracy on valid set: 77.860000 %
+265.0 279.0
+For epoch 174 	Accuracy on valid set: 78.390000 %
+258.0 268.0
+For epoch 175 	Accuracy on valid set: 81.550000 %
+253.0 263.0
+For epoch 176 	Accuracy on valid set: 77.920000 %
+249.0 260.0
+For epoch 177 	Accuracy on valid set: 82.070000 %
+246.0 256.0
+For epoch 178 	Accuracy on valid set: 77.980000 %
+242.0 251.0
+For epoch 179 	Accuracy on valid set: 82.280000 %
+237.0 249.0
+For epoch 180 	Accuracy on valid set: 80.410000 %
+236.0 245.0
+For epoch 181 	Accuracy on valid set: 83.070000 %
+230.0 241.0
+For epoch 182 	Accuracy on valid set: 80.740000 %
+227.0 238.0
+For epoch 183 	Accuracy on valid set: 78.100000 %
+226.0 237.0
+For epoch 184 	Accuracy on valid set: 79.050000 %
+222.0 232.0
+For epoch 185 	Accuracy on valid set: 76.230000 %
+218.0 227.0
+For epoch 186 	Accuracy on valid set: 82.420000 %
+214.0 225.0
+For epoch 187 	Accuracy on valid set: 75.350000 %
+213.0 223.0
+For epoch 188 	Accuracy on valid set: 79.860000 %
+207.0 218.0
+For epoch 189 	Accuracy on valid set: 79.190000 %
+203.0 215.0
+For epoch 190 	Accuracy on valid set: 78.170000 %
+202.0 210.0
+For epoch 191 	Accuracy on valid set: 82.060000 %
+197.0 209.0
+For epoch 192 	Accuracy on valid set: 80.110000 %
+191.0 207.0
+For epoch 193 	Accuracy on valid set: 83.230000 %
+182.0 195.0
+For epoch 194 	Accuracy on valid set: 82.780000 %
+177.0 188.0
+For epoch 195 	Accuracy on valid set: 82.700000 %
+174.0 183.0
+For epoch 196 	Accuracy on valid set: 78.270000 %
+170.0 179.0
+For epoch 197 	Accuracy on valid set: 79.680000 %
+168.0 179.0
+For epoch 198 	Accuracy on valid set: 80.370000 %
+164.0 174.0
+For epoch 199 	Accuracy on valid set: 80.770000 %
+164.0 171.0
+For epoch 200 	Accuracy on valid set: 81.050000 %
+159.0 168.0
+For epoch 201 	Accuracy on valid set: 79.000000 %
+158.0 166.0
+For epoch 202 	Accuracy on valid set: 74.560000 %
+155.0 165.0
+For epoch 203 	Accuracy on valid set: 75.760000 %
+155.0 165.0
+For epoch 204 	Accuracy on valid set: 79.310000 %
+154.0 163.0
+For epoch 205 	Accuracy on valid set: 78.090000 %
+153.0 162.0
+For epoch 206 	Accuracy on valid set: 76.110000 %
+150.0 164.0
+For epoch 207 	Accuracy on valid set: 77.640000 %
+150.0 160.0
+For epoch 208 	Accuracy on valid set: 80.520000 %
+149.0 159.0
+For epoch 209 	Accuracy on valid set: 82.850000 %
+149.0 161.0
+For epoch 210 	Accuracy on valid set: 77.050000 %
+149.0 160.0
+For epoch 211 	Accuracy on valid set: 80.380000 %
+149.0 156.0
+For epoch 212 	Accuracy on valid set: 75.810000 %
+144.0 156.0
+For epoch 213 	Accuracy on valid set: 81.700000 %
+143.0 154.0
+For epoch 214 	Accuracy on valid set: 79.750000 %
+142.0 154.0
+For epoch 215 	Accuracy on valid set: 78.300000 %
+140.0 149.0
+For epoch 216 	Accuracy on valid set: 78.860000 %
+140.0 150.0
+For epoch 217 	Accuracy on valid set: 81.610000 %
+138.0 147.0
+For epoch 218 	Accuracy on valid set: 80.110000 %
+137.0 149.0
+For epoch 219 	Accuracy on valid set: 80.030000 %
+136.0 145.0
+For epoch 220 	Accuracy on valid set: 78.590000 %
+133.0 141.0
+For epoch 221 	Accuracy on valid set: 78.080000 %
+132.0 141.0
+For epoch 222 	Accuracy on valid set: 77.880000 %
+132.0 141.0
+For epoch 223 	Accuracy on valid set: 78.990000 %
+131.0 141.0
+For epoch 224 	Accuracy on valid set: 80.620000 %
+129.0 139.0
+For epoch 225 	Accuracy on valid set: 80.740000 %
+131.0 140.0
+For epoch 226 	Accuracy on valid set: 80.010000 %
+127.0 136.0
+For epoch 227 	Accuracy on valid set: 81.590000 %
+127.0 142.0
+For epoch 228 	Accuracy on valid set: 78.940000 %
+130.0 140.0
+For epoch 229 	Accuracy on valid set: 80.370000 %
+125.0 139.0
+For epoch 230 	Accuracy on valid set: 78.290000 %
+128.0 138.0
+For epoch 231 	Accuracy on valid set: 75.420000 %
+127.0 136.0
+For epoch 232 	Accuracy on valid set: 74.900000 %
+127.0 138.0
+For epoch 233 	Accuracy on valid set: 78.110000 %
+127.0 137.0
+For epoch 234 	Accuracy on valid set: 80.010000 %
+126.0 135.0
+For epoch 235 	Accuracy on valid set: 83.200000 %
+126.0 136.0
+For epoch 236 	Accuracy on valid set: 80.140000 %
+126.0 136.0
+For epoch 237 	Accuracy on valid set: 80.080000 %
+127.0 135.0
+For epoch 238 	Accuracy on valid set: 77.360000 %
+127.0 136.0
+For epoch 239 	Accuracy on valid set: 77.050000 %
+126.0 135.0
+For epoch 240 	Accuracy on valid set: 76.580000 %
+123.0 133.0
+For epoch 241 	Accuracy on valid set: 80.470000 %
+123.0 133.0
+For epoch 242 	Accuracy on valid set: 79.480000 %
+124.0 133.0
+For epoch 243 	Accuracy on valid set: 78.930000 %
+124.0 133.0
+For epoch 244 	Accuracy on valid set: 76.440000 %
+125.0 134.0
+For epoch 245 	Accuracy on valid set: 75.750000 %
+122.0 132.0
+For epoch 246 	Accuracy on valid set: 80.240000 %
+122.0 131.0
+For epoch 247 	Accuracy on valid set: 75.520000 %
+123.0 134.0
+For epoch 248 	Accuracy on valid set: 59.050000 %
+124.0 132.0
+For epoch 249 	Accuracy on valid set: 79.570000 %
+122.0 134.0
+For epoch 250 	Accuracy on valid set: 76.480000 %
+(tf)dhananjay@o990:~/CHN/cifar_highway/run-3$ python incentivize.py [Kpython wide-highway.py 
+Number of training examples : 40000
+442.0 1868.0
+For epoch 1 	Accuracy on valid set: 32.400000 %
+146.0 460.0
+For epoch 2 	Accuracy on valid set: 34.240000 %
+110.0 148.0
+For epoch 3 	Accuracy on valid set: 62.490000 %
+100.0 114.0
+For epoch 4 	Accuracy on valid set: 64.970000 %
+98.0 109.0
+For epoch 5 	Accuracy on valid set: 68.830000 %
+97.0 106.0
+For epoch 6 	Accuracy on valid set: 69.450000 %
+97.0 108.0
+For epoch 7 	Accuracy on valid set: 75.660000 %
+95.0 106.0
+For epoch 8 	Accuracy on valid set: 73.290000 %
+97.0 107.0
+For epoch 9 	Accuracy on valid set: 79.320000 %
+100.0 106.0
+For epoch 10 	Accuracy on valid set: 72.430000 %
+98.0 110.0
+For epoch 11 	Accuracy on valid set: 77.500000 %
+98.0 108.0
+For epoch 12 	Accuracy on valid set: 76.890000 %
+101.0 109.0
+For epoch 13 	Accuracy on valid set: 79.710000 %
+101.0 110.0
+For epoch 14 	Accuracy on valid set: 75.520000 %
+102.0 109.0
+For epoch 15 	Accuracy on valid set: 80.890000 %
+101.0 110.0
+For epoch 16 	Accuracy on valid set: 78.170000 %
+102.0 109.0
+For epoch 17 	Accuracy on valid set: 77.360000 %
+101.0 108.0
+For epoch 18 	Accuracy on valid set: 80.210000 %
+99.0 108.0
+For epoch 19 	Accuracy on valid set: 75.060000 %
+99.0 107.0
+For epoch 20 	Accuracy on valid set: 80.860000 %
+98.0 107.0
+For epoch 21 	Accuracy on valid set: 77.890000 %
+98.0 108.0
+For epoch 22 	Accuracy on valid set: 71.770000 %
+98.0 106.0
+For epoch 23 	Accuracy on valid set: 81.650000 %
+97.0 105.0
+For epoch 24 	Accuracy on valid set: 81.440000 %
+96.0 105.0
+For epoch 25 	Accuracy on valid set: 78.780000 %
+97.0 104.0
+For epoch 26 	Accuracy on valid set: 81.330000 %
+95.0 104.0
+For epoch 27 	Accuracy on valid set: 79.850000 %
+96.0 103.0
+For epoch 28 	Accuracy on valid set: 81.480000 %
+95.0 102.0
+For epoch 29 	Accuracy on valid set: 77.800000 %
+94.0 101.0
+For epoch 30 	Accuracy on valid set: 79.580000 %
+93.0 102.0
+For epoch 31 	Accuracy on valid set: 81.300000 %
+92.0 100.0
+For epoch 32 	Accuracy on valid set: 78.730000 %
+92.0 100.0
+For epoch 33 	Accuracy on valid set: 82.870000 %
+92.0 99.0
+For epoch 34 	Accuracy on valid set: 80.350000 %
+92.0 100.0
+For epoch 35 	Accuracy on valid set: 79.100000 %
+90.0 101.0
+For epoch 36 	Accuracy on valid set: 78.250000 %
+91.0 100.0
+For epoch 37 	Accuracy on valid set: 79.400000 %
+89.0 98.0
+For epoch 38 	Accuracy on valid set: 80.970000 %
+89.0 100.0
+For epoch 39 	Accuracy on valid set: 79.000000 %
+88.0 97.0
+For epoch 40 	Accuracy on valid set: 81.500000 %
+90.0 99.0
+For epoch 41 	Accuracy on valid set: 78.900000 %
+89.0 100.0
+For epoch 42 	Accuracy on valid set: 78.410000 %
+86.0 95.0
+For epoch 43 	Accuracy on valid set: 79.500000 %
+88.0 96.0
+For epoch 44 	Accuracy on valid set: 78.930000 %
+86.0 95.0
+For epoch 45 	Accuracy on valid set: 81.950000 %
+87.0 95.0
+For epoch 46 	Accuracy on valid set: 75.650000 %
+85.0 95.0
+For epoch 47 	Accuracy on valid set: 80.430000 %
+86.0 94.0
+For epoch 48 	Accuracy on valid set: 74.300000 %
+86.0 96.0
+For epoch 49 	Accuracy on valid set: 80.100000 %
+87.0 97.0
+For epoch 50 	Accuracy on valid set: 81.370000 %
+87.0 95.0
+For epoch 51 	Accuracy on valid set: 82.420000 %
+85.0 95.0
+For epoch 52 	Accuracy on valid set: 80.100000 %
+85.0 94.0
+For epoch 53 	Accuracy on valid set: 77.680000 %
+84.0 94.0
+For epoch 54 	Accuracy on valid set: 72.660000 %
+83.0 93.0
+For epoch 55 	Accuracy on valid set: 73.660000 %
+86.0 93.0
+For epoch 56 	Accuracy on valid set: 78.600000 %
+84.0 92.0
+For epoch 57 	Accuracy on valid set: 79.490000 %
+84.0 93.0
+For epoch 58 	Accuracy on valid set: 76.870000 %
+84.0 93.0
+For epoch 59 	Accuracy on valid set: 80.340000 %
+84.0 92.0
+For epoch 60 	Accuracy on valid set: 78.370000 %
+84.0 93.0
+For epoch 61 	Accuracy on valid set: 74.330000 %
+85.0 95.0
+For epoch 62 	Accuracy on valid set: 76.250000 %
+82.0 94.0
+For epoch 63 	Accuracy on valid set: 74.680000 %
+83.0 92.0
+For epoch 64 	Accuracy on valid set: 81.850000 %
+84.0 92.0
+For epoch 65 	Accuracy on valid set: 75.740000 %
+84.0 93.0
+For epoch 66 	Accuracy on valid set: 80.050000 %
+84.0 92.0
+For epoch 67 	Accuracy on valid set: 77.400000 %
+83.0 92.0
+For epoch 68 	Accuracy on valid set: 79.940000 %
+82.0 91.0
+For epoch 69 	Accuracy on valid set: 82.110000 %
+82.0 92.0
+For epoch 70 	Accuracy on valid set: 79.720000 %
+84.0 90.0
+For epoch 71 	Accuracy on valid set: 81.470000 %
+80.0 89.0
+For epoch 72 	Accuracy on valid set: 77.840000 %
+82.0 90.0
+For epoch 73 	Accuracy on valid set: 79.100000 %
+83.0 91.0
+For epoch 74 	Accuracy on valid set: 81.430000 %
+82.0 92.0
+For epoch 75 	Accuracy on valid set: 82.170000 %
+81.0 92.0
+For epoch 76 	Accuracy on valid set: 83.110000 %
+82.0 91.0
+For epoch 77 	Accuracy on valid set: 79.430000 %
+82.0 90.0
+For epoch 78 	Accuracy on valid set: 80.090000 %
+81.0 90.0
+For epoch 79 	Accuracy on valid set: 73.320000 %
+68.0 86.0
+For epoch 80 	Accuracy on valid set: 88.230000 %
+60.0 69.0
+For epoch 81 	Accuracy on valid set: 88.570000 %
+55.0 61.0
+For epoch 82 	Accuracy on valid set: 88.720000 %
+51.0 56.0
+For epoch 83 	Accuracy on valid set: 88.930000 %
+49.0 52.0
+For epoch 84 	Accuracy on valid set: 88.610000 %
+47.0 50.0
+For epoch 85 	Accuracy on valid set: 88.800000 %
+46.0 48.0
+For epoch 86 	Accuracy on valid set: 88.900000 %
+45.0 47.0
+For epoch 87 	Accuracy on valid set: 88.740000 %
+45.0 46.0
+For epoch 88 	Accuracy on valid set: 88.730000 %
+44.0 45.0
+For epoch 89 	Accuracy on valid set: 88.630000 %
+44.0 45.0
+For epoch 90 	Accuracy on valid set: 88.840000 %
+43.0 44.0
+For epoch 91 	Accuracy on valid set: 88.540000 %
+43.0 44.0
+For epoch 92 	Accuracy on valid set: 88.650000 %
+43.0 44.0
+For epoch 93 	Accuracy on valid set: 88.660000 %
+42.0 43.0
+For epoch 94 	Accuracy on valid set: 88.680000 %
+42.0 43.0
+For epoch 95 	Accuracy on valid set: 88.710000 %
+42.0 43.0
+For epoch 96 	Accuracy on valid set: 88.630000 %
+42.0 43.0
+For epoch 97 	Accuracy on valid set: 88.620000 %
+42.0 43.0
+For epoch 98 	Accuracy on valid set: 88.520000 %
+41.0 43.0
+For epoch 99 	Accuracy on valid set: 88.550000 %
+41.0 42.0
+For epoch 100 	Accuracy on valid set: 88.550000 %
+41.0 42.0
+For epoch 101 	Accuracy on valid set: 88.290000 %
+41.0 42.0
+For epoch 102 	Accuracy on valid set: 88.390000 %
+41.0 42.0
+For epoch 103 	Accuracy on valid set: 88.320000 %
+41.0 42.0
+For epoch 104 	Accuracy on valid set: 88.300000 %
+41.0 42.0
+For epoch 105 	Accuracy on valid set: 88.200000 %
+41.0 42.0
+For epoch 106 	Accuracy on valid set: 88.210000 %
+41.0 42.0
+For epoch 107 	Accuracy on valid set: 88.260000 %
+41.0 42.0
+For epoch 108 	Accuracy on valid set: 88.540000 %
+41.0 42.0
+For epoch 109 	Accuracy on valid set: 88.230000 %
+41.0 42.0
+For epoch 110 	Accuracy on valid set: 88.290000 %
+41.0 42.0
+For epoch 111 	Accuracy on valid set: 88.230000 %
+41.0 42.0
+For epoch 112 	Accuracy on valid set: 88.190000 %
+41.0 42.0
+For epoch 113 	Accuracy on valid set: 88.190000 %
+41.0 42.0
+For epoch 114 	Accuracy on valid set: 88.280000 %
+41.0 42.0
+For epoch 115 	Accuracy on valid set: 88.150000 %
+41.0 42.0
+For epoch 116 	Accuracy on valid set: 88.060000 %
+41.0 42.0
+For epoch 117 	Accuracy on valid set: 87.990000 %
+41.0 42.0
+For epoch 118 	Accuracy on valid set: 87.830000 %
+41.0 42.0
+For epoch 119 	Accuracy on valid set: 88.080000 %
+41.0 42.0
+For epoch 120 	Accuracy on valid set: 88.010000 %
+41.0 42.0
+For epoch 121 	Accuracy on valid set: 88.140000 %
+41.0 42.0
+For epoch 122 	Accuracy on valid set: 88.140000 %
+41.0 42.0
+For epoch 123 	Accuracy on valid set: 88.060000 %
+41.0 42.0
+For epoch 124 	Accuracy on valid set: 88.060000 %
+41.0 42.0
+For epoch 125 	Accuracy on valid set: 87.990000 %
+41.0 42.0
+For epoch 126 	Accuracy on valid set: 88.040000 %
+41.0 41.0
+For epoch 127 	Accuracy on valid set: 88.090000 %
+41.0 41.0
+For epoch 128 	Accuracy on valid set: 87.880000 %
+41.0 41.0
+For epoch 129 	Accuracy on valid set: 87.980000 %
+41.0 41.0
+For epoch 130 	Accuracy on valid set: 87.940000 %
+41.0 41.0
+For epoch 131 	Accuracy on valid set: 87.990000 %
+41.0 42.0
+For epoch 132 	Accuracy on valid set: 87.970000 %
+41.0 41.0
+For epoch 133 	Accuracy on valid set: 88.010000 %
+41.0 41.0
+For epoch 134 	Accuracy on valid set: 88.000000 %
+41.0 41.0
+For epoch 135 	Accuracy on valid set: 88.020000 %
+41.0 41.0
+For epoch 136 	Accuracy on valid set: 87.930000 %
+41.0 41.0
+For epoch 137 	Accuracy on valid set: 87.920000 %
+41.0 41.0
+For epoch 138 	Accuracy on valid set: 88.030000 %
+41.0 41.0
+For epoch 139 	Accuracy on valid set: 87.940000 %
+41.0 41.0
+For epoch 140 	Accuracy on valid set: 88.020000 %
+41.0 41.0
+For epoch 141 	Accuracy on valid set: 87.910000 %
+41.0 41.0
+For epoch 142 	Accuracy on valid set: 87.900000 %
+41.0 41.0
+For epoch 143 	Accuracy on valid set: 87.890000 %
+41.0 41.0
+For epoch 144 	Accuracy on valid set: 87.930000 %
+41.0 41.0
+For epoch 145 	Accuracy on valid set: 87.950000 %
+41.0 41.0
+For epoch 146 	Accuracy on valid set: 87.940000 %
+41.0 41.0
+For epoch 147 	Accuracy on valid set: 87.920000 %
+41.0 41.0
+For epoch 148 	Accuracy on valid set: 87.870000 %
+41.0 41.0
+For epoch 149 	Accuracy on valid set: 87.790000 %
