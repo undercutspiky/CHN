@@ -1,0 +1,52 @@
+dhananjay@o990:~/CHN/cifar_highway/prune-3/screen-45$ source /home/dhananjay/common.sh 
+(tf)dhananjay@o990:~/CHN/cifar_highway/prune-3/screen-45$ export CUDA_VISIBLE_DEVICES=1
+(tf)dhananjay@o990:~/CHN/cifar_highway/prune-3/screen-45$ python test.py 
+Number of training examples : 40000
+Conv2d(256, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 17: 87.590000 %
+37.0 38.0
+Accuracy after pruning and training for 1 epoch layer 17 onwards: 87.510000 %
+Conv2d(256, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 16: 81.300000 %
+38.0 39.0
+Accuracy after pruning and training for 1 epoch layer 16 onwards: 87.500000 %
+Conv2d(256, 43, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 15: 58.270000 %
+54.0 55.0
+Accuracy after pruning and training for 1 epoch layer 15 onwards: 87.670000 %
+Conv2d(256, 47, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 14: 31.050000 %
+73.0 75.0
+Accuracy after pruning and training for 1 epoch layer 14 onwards: 86.130000 %
+Conv2d(256, 61, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 13: 12.230000 %
+94.0 96.0
+Accuracy after pruning and training for 1 epoch layer 13 onwards: 80.650000 %
+Completely Pruned !
+Accuracy on valid set after pruning layer 11: 64.910000 %
+93.0 95.0
+Accuracy after pruning and training for 1 epoch layer 11 onwards: 81.550000 %
+93.0 95.0
+Accuracy after pruning and training for 2 epochs layer 11 onwards: 82.100000 %
+Conv2d(128, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 10: 10.030000 %
+93.0 95.0
+Accuracy after pruning and training for 1 epoch layer 10 onwards: 82.470000 %
+93.0 95.0
+Accuracy after pruning and training for 2 epochs layer 10 onwards: 82.700000 %
+Conv2d(128, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 9: 44.510000 %
+93.0 95.0
+Accuracy after pruning and training for 1 epoch layer 9 onwards: 82.550000 %
+93.0 95.0
+Accuracy after pruning and training for 2 epochs layer 9 onwards: 82.750000 %
+Conv2d(128, 12, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 8: 10.140000 %
+97.0 100.0
+Accuracy after pruning and training for 1 epoch layer 8 onwards: 80.720000 %
+97.0 100.0
+Accuracy after pruning and training for 2 epochs layer 8 onwards: 80.960000 %
+Conv2d(128, 20, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 7: 9.830000 %
+106.0 109.0
+Accuracy after pruning and training for 1 epoch layer 7 onwards: 76.490000 %

@@ -1,0 +1,135 @@
+dhananjay@o990:~/CHN/cifar_highway/prune-3/screen-30$ source /home/dhananjay/common.sh 
+(tf)dhananjay@o990:~/CHN/cifar_highway/prune-3/screen-30$ export cuda[K[K[K[KCUDA_VISIBLE_DEVICES=0
+(tf)dhananjay@o990:~/CHN/cifar_highway/prune-3/screen-30$ python test.py 
+Number of training examples : 40000
+Conv2d(256, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 17: 87.590000 %
+37.0 38.0
+Accuracy after pruning and training for 1 epoch layer 17 onwards: 87.480000 %
+Conv2d(256, 11, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 16: 81.030000 %
+40.0 41.0
+Accuracy after pruning and training for 1 epoch layer 16 onwards: 87.740000 %
+Conv2d(256, 49, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 15: 60.380000 %
+58.0 59.0
+Accuracy after pruning and training for 1 epoch layer 15 onwards: 87.660000 %
+Conv2d(256, 63, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 14: 20.200000 %
+82.0 85.0
+Accuracy after pruning and training for 1 epoch layer 14 onwards: 86.490000 %
+Conv2d(256, 84, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 13: 10.030000 %
+110.0 113.0
+Accuracy after pruning and training for 1 epoch layer 13 onwards: 83.130000 %
+Completely Pruned !
+Accuracy on valid set after pruning layer 11: 75.750000 %
+110.0 113.0
+Accuracy after pruning and training for 1 epoch layer 11 onwards: 83.500000 %
+110.0 112.0
+Accuracy after pruning and training for 2 epochs layer 11 onwards: 83.960000 %
+Conv2d(128, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 10: 10.030000 %
+110.0 113.0
+Accuracy after pruning and training for 1 epoch layer 10 onwards: 84.060000 %
+110.0 112.0
+Accuracy after pruning and training for 2 epochs layer 10 onwards: 84.260000 %
+Conv2d(128, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 9: 37.490000 %
+109.0 112.0
+Accuracy after pruning and training for 1 epoch layer 9 onwards: 84.300000 %
+109.0 112.0
+Accuracy after pruning and training for 2 epochs layer 9 onwards: 84.430000 %
+Conv2d(128, 19, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 8: 9.980000 %
+117.0 120.0
+Accuracy after pruning and training for 1 epoch layer 8 onwards: 83.100000 %
+117.0 120.0
+Accuracy after pruning and training for 2 epochs layer 8 onwards: 83.300000 %
+Conv2d(128, 35, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 7: 16.520000 %
+132.0 135.0
+Accuracy after pruning and training for 1 epoch layer 7 onwards: 80.630000 %
+132.0 135.0
+Accuracy after pruning and training for 2 epochs layer 7 onwards: 80.990000 %
+Completely Pruned !
+Accuracy on valid set after pruning layer 5: 64.690000 %
+132.0 134.0
+Accuracy after pruning and training for 1 epoch layer 5 onwards: 81.130000 %
+132.0 134.0
+Accuracy after pruning and training for 2 epochs layer 5 onwards: 81.390000 %
+132.0 134.0
+Accuracy after pruning and training for 3 epochs layer 5 onwards: 81.650000 %
+Conv2d(64, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 4: 10.410000 %
+132.0 134.0
+Accuracy after pruning and training for 1 epoch layer 4 onwards: 81.270000 %
+132.0 134.0
+Accuracy after pruning and training for 2 epochs layer 4 onwards: 81.480000 %
+132.0 134.0
+Accuracy after pruning and training for 3 epochs layer 4 onwards: 81.620000 %
+Conv2d(64, 9, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 3: 12.110000 %
+135.0 137.0
+Accuracy after pruning and training for 1 epoch layer 3 onwards: 81.070000 %
+135.0 137.0
+Accuracy after pruning and training for 2 epochs layer 3 onwards: 81.210000 %
+135.0 137.0
+Accuracy after pruning and training for 3 epochs layer 3 onwards: 81.230000 %
+Conv2d(64, 11, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 2: 10.030000 %
+140.0 143.0
+Accuracy after pruning and training for 1 epoch layer 2 onwards: 78.840000 %
+140.0 143.0
+Accuracy after pruning and training for 2 epochs layer 2 onwards: 79.210000 %
+140.0 143.0
+Accuracy after pruning and training for 3 epochs layer 2 onwards: 79.560000 %
+Conv2d(64, 30, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Accuracy on valid set after pruning layer 1: 9.610000 %
+146.0 150.0
+Accuracy after pruning and training for 1 epoch layer 1 onwards: 76.530000 %
+146.0 150.0
+Accuracy after pruning and training for 2 epochs layer 1 onwards: 77.090000 %
+146.0 150.0
+Accuracy after pruning and training for 3 epochs layer 1 onwards: 77.530000 %
+146.0 152.0
+For epoch 1 	Accuracy on valid set: 85.240000 %
+148.0 153.0
+For epoch 2 	Accuracy on valid set: 85.830000 %
+149.0 152.0
+For epoch 3 	Accuracy on valid set: 86.050000 %
+149.0 153.0
+For epoch 4 	Accuracy on valid set: 86.380000 %
+150.0 154.0
+For epoch 5 	Accuracy on valid set: 86.640000 %
+151.0 155.0
+For epoch 6 	Accuracy on valid set: 86.650000 %
+153.0 156.0
+For epoch 7 	Accuracy on valid set: 87.010000 %
+154.0 157.0
+For epoch 8 	Accuracy on valid set: 86.770000 %
+155.0 159.0
+For epoch 9 	Accuracy on valid set: 87.020000 %
+156.0 160.0
+For epoch 10 	Accuracy on valid set: 87.010000 %
+157.0 160.0
+For epoch 11 	Accuracy on valid set: 86.980000 %
+157.0 160.0
+For epoch 12 	Accuracy on valid set: 87.030000 %
+157.0 160.0
+For epoch 13 	Accuracy on valid set: 87.050000 %
+157.0 160.0
+For epoch 14 	Accuracy on valid set: 87.010000 %
+157.0 160.0
+For epoch 15 	Accuracy on valid set: 87.000000 %
+157.0 160.0
+For epoch 16 	Accuracy on valid set: 87.170000 %
+157.0 160.0
+For epoch 17 	Accuracy on valid set: 87.050000 %
+158.0 160.0
+For epoch 18 	Accuracy on valid set: 87.000000 %
+157.0 161.0
+For epoch 19 	Accuracy on valid set: 87.040000 %
+158.0 161.0
+For epoch 20 	Accuracy on valid set: 87.050000 %
+(tf)dhananjay@o990:~/CHN/cifar_highway/prune-3/screen-30$ exit
