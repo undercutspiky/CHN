@@ -253,7 +253,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(network.parameters(), lr=0.0005, momentum=0.9, weight_decay=5e-4, nesterov=True)
 transform = transforms.Compose([transforms.RandomCrop(32, padding=4), transforms.RandomHorizontalFlip()])
 
-epochs = 50
+epochs = 20
 batch_size = 128
 print "Number of training examples : "+str(train_x.size(0))
 prune_at = [1]

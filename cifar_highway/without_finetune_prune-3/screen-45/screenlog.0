@@ -1,0 +1,80 @@
+dhananjay@o990:~/CHN/cifar_highway/without_finetune_prune-3/screen-45$ soure [K[Kce /home/dhananjay/common.sh 
+(tf)dhananjay@o990:~/CHN/cifar_highway/without_finetune_prune-3/screen-45$ export CUDA_VISIBLE_DEVICES=0
+(tf)dhananjay@o990:~/CHN/cifar_highway/without_finetune_prune-3/screen-45$ python test.py 
+Number of training examples : 40000
+Conv2d(256, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(256, 8, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(256, 43, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(256, 47, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(256, 61, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Completely Pruned !
+Conv2d(128, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(128, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(128, 12, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(128, 20, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Completely Pruned !
+Conv2d(64, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(64, 2, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(64, 6, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+Conv2d(64, 7, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+111.0 114.0
+For epoch 1 	Accuracy on valid set: 67.130000 %
+113.0 116.0
+For epoch 2 	Accuracy on valid set: 73.070000 %
+115.0 118.0
+For epoch 3 	Accuracy on valid set: 75.530000 %
+115.0 119.0
+For epoch 4 	Accuracy on valid set: 77.320000 %
+117.0 124.0
+For epoch 5 	Accuracy on valid set: 83.740000 %
+121.0 126.0
+For epoch 6 	Accuracy on valid set: 84.260000 %
+123.0 127.0
+For epoch 7 	Accuracy on valid set: 85.200000 %
+124.0 127.0
+For epoch 8 	Accuracy on valid set: 84.930000 %
+125.0 129.0
+For epoch 9 	Accuracy on valid set: 84.750000 %
+126.0 130.0
+For epoch 10 	Accuracy on valid set: 84.880000 %
+127.0 132.0
+For epoch 11 	Accuracy on valid set: 85.210000 %
+128.0 132.0
+For epoch 12 	Accuracy on valid set: 85.510000 %
+129.0 134.0
+For epoch 13 	Accuracy on valid set: 84.800000 %
+130.0 135.0
+For epoch 14 	Accuracy on valid set: 85.710000 %
+132.0 135.0
+For epoch 15 	Accuracy on valid set: 85.530000 %
+133.0 137.0
+For epoch 16 	Accuracy on valid set: 85.850000 %
+134.0 139.0
+For epoch 17 	Accuracy on valid set: 85.630000 %
+135.0 140.0
+For epoch 18 	Accuracy on valid set: 85.750000 %
+136.0 141.0
+For epoch 19 	Accuracy on valid set: 85.490000 %
+137.0 140.0
+For epoch 20 	Accuracy on valid set: 86.000000 %
+137.0 140.0
+For epoch 21 	Accuracy on valid set: 85.900000 %
+137.0 141.0
+For epoch 22 	Accuracy on valid set: 85.800000 %
+137.0 141.0
+For epoch 23 	Accuracy on valid set: 86.070000 %
+137.0 141.0
+For epoch 24 	Accuracy on valid set: 85.920000 %
+138.0 141.0
+For epoch 25 	Accuracy on valid set: 86.030000 %
+138.0 141.0
+For epoch 26 	Accuracy on valid set: 86.070000 %
+138.0 142.0
+For epoch 27 	Accuracy on valid set: 85.790000 %
+138.0 142.0
+For epoch 28 	Accuracy on valid set: 85.910000 %
+138.0 142.0
+For epoch 29 	Accuracy on valid set: 85.940000 %
+138.0 142.0
+For epoch 30 	Accuracy on valid set: 86.030000 %
+(tf)dhananjay@o990:~/CHN/cifar_highway/without_finetune_prune-3/screen-45$ exit
